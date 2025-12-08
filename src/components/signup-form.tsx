@@ -26,6 +26,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     if (state && !state.success && state.message) {
       toast.error(state.message);
     }
+    if (state && state.success && state.message) {
+      toast.success(state.message);
+    }
   }, [state]);
   return (
     <Card {...props}>

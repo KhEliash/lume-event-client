@@ -25,10 +25,13 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [state, formAction, isPending] = useActionState(loginUser, null);
-
   useEffect(() => {
     if (state && !state.success && state.message) {
       toast.error(state.message);
+    }
+    if (state && state.success && state.message) {
+      toast.success(state.message);
+      window.location.reload();
     }
   }, [state]);
   return (
