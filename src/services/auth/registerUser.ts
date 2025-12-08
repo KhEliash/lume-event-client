@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+const API_URL = process.env.NEXT_API_BASE_URL;
+
 export const registerUser = async (
   _currentState: any,
   formData: any
@@ -12,7 +14,7 @@ export const registerUser = async (
       fullName: formData.get("name"),
     };
 
-    const res = await fetch("http://localhost:5000/api/users/register", {
+    const res = await fetch(`${API_URL}/users/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
