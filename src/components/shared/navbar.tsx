@@ -40,7 +40,12 @@ export function Navbar() {
 
         {/* Right Side (Logout + Mobile Button) */}
         <div className="flex items-center gap-4">
-          <Button variant="outline">Logout</Button>
+          {/* <Button variant="outline">Logout</Button> */}
+          <Link href={"/login"}>
+            <Button variant="default" className="cursor-pointer">
+              Login
+            </Button>
+          </Link>
 
           {/* Mobile Hamburger */}
           <button className="md:hidden" onClick={() => setOpen(!open)}>
