@@ -13,6 +13,7 @@ interface ActionResponse {
   data?: any;
 }
 
+// create event
 export const createEventAction = async (
   _currentState: ActionResponse,
   formData: FormData
@@ -61,6 +62,97 @@ export const createEventAction = async (
           ? error.message
           : "Please try again."
       }`,
+    };
+  }
+};
+
+// my hosted events
+export const myHostedEvents = async () => {
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("accessToken")?.value;
+
+  if (!token) {
+    return {
+      success: false,
+      message: "Authentication token missing.",
+      events: [],
+    };
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/events/hosted`, {
+      method: "GET",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+      // cache: "no-store",
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      const errorMessage =
+        result.message || `Failed to fetch events. Status: ${res.status}`;
+      console.error("Fetch Error:", errorMessage);
+
+      return {
+        success: false,
+        message: errorMessage,
+        result,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Successfully fetched hosted events.",
+      events: result,
+    };
+  } catch (error) {
+    console.error("Network/Parsing Error during hosted events fetch:", error);
+    return {
+      success: false,
+      message: `An unexpected error occurred: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      events: [],
+    };
+  }
+};
+
+// event by id
+export const eventById = async (id: string) => {
+  try {
+    const res = await fetch(`${API_URL}/events/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store", // optional
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to fetch event.",
+        event: null,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Successfully fetched event.",
+      event: result,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Error: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      event: null,
     };
   }
 };

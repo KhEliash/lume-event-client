@@ -1,6 +1,5 @@
 import { CreateEventForm } from "@/components/modules/Host/CreateEventForm";
-import React from "react";
-
+ 
 const HostCreatePage = () => {
   return (
     <div className="  min-h-svh w-full  p-6 md:p-10">

@@ -121,7 +121,7 @@ export function CreateEventForm() {
             <FormItem>
               <FormLabel>Event Type</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
+                <FormControl className="w-full cursor-pointer">
                   <SelectTrigger>
                     <SelectValue placeholder="Select an event type" />
                   </SelectTrigger>
@@ -316,7 +316,7 @@ export function CreateEventForm() {
 
         <Button
           type="submit"
-          className="w-full"
+          className="w-full cursor-pointer"
           disabled={form.formState.isSubmitting}
         >
           {pending ? "Creating..." : "Create Event"}
