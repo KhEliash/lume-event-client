@@ -4,7 +4,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-
+ 
 const API_URL = process.env.NEXT_API_BASE_URL;
 
 interface ActionResponse {
@@ -128,7 +128,7 @@ export const eventById = async (id: string) => {
       headers: {
         "Content-Type": "application/json",
       },
-      cache: "no-store", // optional
+      cache: "no-store",  
     });
 
     const result = await res.json();
@@ -172,8 +172,7 @@ export const updateEventAction = async (
       };
     }
 
-    // 2️⃣ Send PATCH request to backend
-    const res = await fetch(`${API_URL}/events/${eventId}`, {
+     const res = await fetch(`${API_URL}/events/${eventId}`, {
       method: "PATCH",
       body: formData,
       headers: {
@@ -190,8 +189,7 @@ export const updateEventAction = async (
       };
     }
 
-    // 3️⃣ Revalidate relevant paths (optional)
-    revalidatePath("/host/dashboard/hosted-events"); // adjust if needed
+     revalidatePath("/host/dashboard/hosted-events"); // adjust if needed
     revalidatePath(`/host/dashboard/event/${eventId}`);
 
     return {
@@ -254,3 +252,4 @@ export const deleteEvent = async (id: string) => {
     };
   }
 };
+

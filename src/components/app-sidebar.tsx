@@ -24,12 +24,17 @@ const menuItems = {
     {
       title: "Create Event",
       url: "/host/dashboard/create-event",
-      icon: "Star",
+      icon: "BadgePlus",
     },
     {
       title: "My Events",
       url: "/host/dashboard/hosted-events",
-      icon: "Settings",
+      icon: "Calendars",
+    },
+    {
+      title: "My Reviews",
+      url: "/host/dashboard/reviews",
+      icon: "Star",
     },
   ],
   admin: [
