@@ -142,9 +142,7 @@ export const eventById = async (id: string) => {
     }
 
     return {
-      success: true,
-      message: "Successfully fetched event.",
-      event: result,
+      result:result.data,
     };
   } catch (error) {
     return {
@@ -153,6 +151,63 @@ export const eventById = async (id: string) => {
         error instanceof Error ? error.message : String(error)
       }`,
       event: null,
+    };
+  }
+};
+
+// update event
+export const updateEventAction = async (
+  _currentState: ActionResponse,
+  eventId: string,
+  formData: FormData
+): Promise<ActionResponse> => {
+  try {
+    const cookieStore = cookies();
+    const token = (await cookieStore).get("accessToken")?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        message: "No access token found. Please log in.",
+      };
+    }
+
+    // 2️⃣ Send PATCH request to backend
+    const res = await fetch(`${API_URL}/events/${eventId}`, {
+      method: "PATCH",
+      body: formData,
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to update event.",
+      };
+    }
+
+    // 3️⃣ Revalidate relevant paths (optional)
+    revalidatePath("/host/dashboard/hosted-events"); // adjust if needed
+    revalidatePath(`/host/dashboard/event/${eventId}`);
+
+    return {
+      success: true,
+      message: "Event updated successfully!",
+      data: result.data,
+    };
+  } catch (error: any) {
+    console.error("Event update failed:", error);
+    return {
+      success: false,
+      message: `An unexpected error occurred: ${
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Please try again."
+      }`,
     };
   }
 };
