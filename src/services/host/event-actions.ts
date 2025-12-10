@@ -142,7 +142,7 @@ export const eventById = async (id: string) => {
     }
 
     return {
-      result:result.data,
+      result: result.data,
     };
   } catch (error) {
     return {
@@ -207,6 +207,49 @@ export const updateEventAction = async (
         process.env.NODE_ENV === "development"
           ? error.message
           : "Please try again."
+      }`,
+    };
+  }
+};
+
+// delete event
+export const deleteEvent = async (id: string) => {
+  try {
+    const cookieStore = cookies();
+    const token = (await cookieStore).get("accessToken")?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        message: "No access token found. Please log in.",
+      };
+    }
+    const res = await fetch(`${API_URL}/events/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to delete event.",
+      };
+    }
+    revalidatePath("/host/dashboard/hosted-events");
+
+    return {
+      success: true,
+      message: result.message || "Event deleted successfully.",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Error: ${
+        error instanceof Error ? error.message : String(error)
       }`,
     };
   }
