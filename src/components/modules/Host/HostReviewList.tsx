@@ -25,6 +25,7 @@ import {
 } from "lucide-react"; // Added UserIcon, Calendar, Zap
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { deleteReviewAction } from "@/services/review/review-actions";
 
 // Utility to display full/empty stars
 const StarDisplay = ({ rating }: { rating: number }) => {
@@ -56,13 +57,13 @@ export default function HostReviewList({ reviews }: { reviews: any[] }) {
   const [isPending, startTransition] = useTransition();
   console.log(startTransition); // Keep existing code structure
 
-  // const handleDelete = (reviewId: string) => {
-  //   startTransition(async () => {
-  //     const res = await deleteReviewAction(reviewId);
-  //     if (res.success) toast.success("Review deleted!");
-  //     else toast.error("Failed to delete review.");
-  //   });
-  // };
+  const handleDelete = (reviewId: string) => {
+    startTransition(async () => {
+      const res = await deleteReviewAction(reviewId);
+      if (res.success) toast.success("Review deleted!");
+      else toast.error("Failed to delete review.");
+    });
+  };
 
   if (!reviews || reviews.length === 0)
     return (
@@ -146,7 +147,7 @@ export default function HostReviewList({ reviews }: { reviews: any[] }) {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        // onClick={() => handleDelete(review._id)}
+                        onClick={() => handleDelete(review._id)}
                         disabled={isPending}
                         className="bg-red-600 hover:bg-red-700"
                       >

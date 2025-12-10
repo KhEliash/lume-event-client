@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use server";
+
 import { HostReviewsResponse } from "@/types/reviews";
 import { cookies } from "next/headers";
 
 const API_URL = process.env.NEXT_API_BASE_URL;
-
 
 // Host reviews
 export const getHostReviews = async (
@@ -12,22 +13,21 @@ export const getHostReviews = async (
   limit: number = 10
 ): Promise<HostReviewsResponse> => {
   try {
-
     const cookieStore = cookies();
-  const token = (await cookieStore).get("accessToken")?.value;
+    const token = (await cookieStore).get("accessToken")?.value;
 
-  if (!token) {
-    return {
-      success: false,
-      message: "Authentication token missing.",
-      reviews: [],
-    };
-  }
+    if (!token) {
+      return {
+        success: false,
+        message: "Authentication token missing.",
+        reviews: [],
+      };
+    }
     const res = await fetch(
       `${API_URL}/reviews/host/${hostId}?page=${page}&limit=${limit}`,
       {
         method: "GET",
-        headers: { Authorization: token, },
+        headers: { Authorization: token },
         cache: "no-store",
       }
     );
@@ -35,7 +35,10 @@ export const getHostReviews = async (
     const result = await res.json();
 
     if (!res.ok) {
-      return { success: false, message: result.message || "Failed to fetch reviews." };
+      return {
+        success: false,
+        message: result.message || "Failed to fetch reviews.",
+      };
     }
 
     return {
@@ -49,12 +52,14 @@ export const getHostReviews = async (
   } catch (error) {
     return {
       success: false,
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Error: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     };
   }
 };
 
-// delete 
+// delete
 export async function deleteReviewAction(reviewId: string) {
   try {
     const token = (await cookies()).get("accessToken")?.value;
