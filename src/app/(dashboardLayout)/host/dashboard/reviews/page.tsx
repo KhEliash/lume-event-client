@@ -1,6 +1,6 @@
 import HostReviewList from "@/components/modules/Host/HostReviewList";
 import { getHostReviews } from "@/services/review/review-actions";
- import { getMe } from "@/services/user/getMe";
+ import { getMe } from "@/services/user/userprofile";
 import React from "react";
 
 const Reviews = async () => {

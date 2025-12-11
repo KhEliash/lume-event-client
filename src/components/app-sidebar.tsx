@@ -16,7 +16,7 @@ import SidebarClient from "./SidebarClient";
 const menuItems = {
   user: [
     { title: "Home", url: "/", icon: "Home" },
-    { title: "Inbox", url: "/dashboard/inbox", icon: "Inbox" },
+    { title: "My Profile", url: "/dashboard/profile", icon: "User" },
     { title: "Calendar", url: "/dashboard/calendar", icon: "Calendar" },
   ],
   host: [
