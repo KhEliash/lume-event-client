@@ -15,17 +15,11 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import {
-  Trash2,
-  Edit,
-  Star,
-  Calendar,
-  Zap,
-  User as UserIcon,
-} from "lucide-react"; // Added UserIcon, Calendar, Zap
+import { Trash2, Star, Calendar, Zap, User as UserIcon } from "lucide-react"; // Added UserIcon, Calendar, Zap
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { deleteReviewAction } from "@/services/review/review-actions";
+import { UpdateReviewDialog } from "./UpdateReviewDialog";
 
 // Utility to display full/empty stars
 const StarDisplay = ({ rating }: { rating: number }) => {
@@ -55,7 +49,7 @@ const formatDate = (dateString: string) => {
 
 export default function HostReviewList({ reviews }: { reviews: any[] }) {
   const [isPending, startTransition] = useTransition();
-  console.log(startTransition); // Keep existing code structure
+  console.log(reviews); // Keep existing code structure
 
   const handleDelete = (reviewId: string) => {
     startTransition(async () => {
@@ -112,14 +106,14 @@ export default function HostReviewList({ reviews }: { reviews: any[] }) {
               {/* Actions */}
               <div className="flex gap-2">
                 {/* Update (Edit) - Optional for host, usually only reviewer can edit */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1 text-gray-600 hover:bg-gray-100"
-                  onClick={() => toast.info("Host cannot edit user reviews.")}
-                >
-                  <Edit size={16} /> Edit
-                </Button>
+
+                <UpdateReviewDialog
+                  reviewId={review._id}
+                  defaultValues={{
+                    rating: review.rating,
+                    comment: review.comment,
+                  }}
+                />
 
                 {/* Delete (Confirmation Dialog) */}
                 <AlertDialog>

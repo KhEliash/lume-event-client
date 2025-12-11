@@ -84,3 +84,70 @@ export async function deleteReviewAction(reviewId: string) {
     };
   }
 }
+
+// update
+export async function updateReviewAction(
+  reviewId: string,
+  data: { rating: number; comment: string }
+) {
+  try {
+    const token = (await cookies()).get("accessToken")?.value;
+
+    const res = await fetch(`${API_URL}/reviews/${reviewId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: token || "",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+
+    return {
+      success: res.ok,
+      message: result.message,
+      data: result.data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
+// get event reviews
+export const getEventReviews = async (
+  eventId: string
+): Promise<HostReviewsResponse> => {
+  try {
+    const res = await fetch(`${API_URL}/reviews/event/${eventId} `, {
+      method: "GET",
+      // headers: { Authorization: token },
+      cache: "no-store",
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to fetch reviews.",
+      };
+    }
+
+    return {
+      success: true,
+      message: result.message || "Reviews fetched successfully",
+      reviews: result.data || [],
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Error: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+};

@@ -15,6 +15,9 @@ import {
   Activity,
   AlertTriangle,
 } from "lucide-react";
+import { getEventReviews } from "@/services/review/review-actions";
+import { Separator } from "@/components/ui/separator";
+import { ReviewCard } from "@/components/modules/Host/ReviewCard";
 
 // --- UTILITY FUNCTIONS ---
 const formatDate = (isoDate: string): string => {
@@ -48,21 +51,19 @@ export default async function EventDetailsPage({
   params: { id: string };
 }) {
   const { id } = await params;
-  const result = await eventById(id);
-
-  // Cast for easier access and type clarity
-  const { success, event, message } = result as any;
-
-  if (!success || !event || !event.data) {
+  const resultEvent = await eventById(id);
+  const eventReviews = await getEventReviews(id);
+ 
+  if (!resultEvent) {
     return (
       <div className="text-red-500 p-10 text-center font-semibold border-2 border-red-300 rounded-xl bg-red-50">
         <AlertTriangle className="w-5 h-5 inline mr-2" /> Error:{" "}
-        {message || "Event not found."}
+        {"Event not found."}
       </div>
     );
   }
 
-  const events = event.data;
+  const events = resultEvent.result;
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
@@ -268,6 +269,14 @@ export default async function EventDetailsPage({
             </div>
           </div>
         </div>
+      </div>
+
+      <Separator />
+      <div>
+        <h1 className="text-center text-2xl font-bold"> Reviews</h1>
+        {eventReviews.reviews.map((review: any, index: number) => (
+          <ReviewCard key={index} review={review} />
+        ))}
       </div>
     </div>
   );
