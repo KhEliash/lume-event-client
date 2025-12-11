@@ -4,7 +4,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
- 
+
 const API_URL = process.env.NEXT_API_BASE_URL;
 
 interface ActionResponse {
@@ -128,7 +128,7 @@ export const eventById = async (id: string) => {
       headers: {
         "Content-Type": "application/json",
       },
-      cache: "no-store",  
+      cache: "no-store",
     });
 
     const result = await res.json();
@@ -137,12 +137,14 @@ export const eventById = async (id: string) => {
       return {
         success: false,
         message: result.message || "Failed to fetch event.",
-        event: null,
+        data: null,
       };
     }
 
     return {
-      result: result.data,
+      success: true,
+      message: "Event fetched successfully.",
+      data: result.data,
     };
   } catch (error) {
     return {
@@ -150,7 +152,7 @@ export const eventById = async (id: string) => {
       message: `Error: ${
         error instanceof Error ? error.message : String(error)
       }`,
-      event: null,
+      data: null,
     };
   }
 };
@@ -172,7 +174,7 @@ export const updateEventAction = async (
       };
     }
 
-     const res = await fetch(`${API_URL}/events/${eventId}`, {
+    const res = await fetch(`${API_URL}/events/${eventId}`, {
       method: "PATCH",
       body: formData,
       headers: {
@@ -189,7 +191,7 @@ export const updateEventAction = async (
       };
     }
 
-     revalidatePath("/host/dashboard/hosted-events"); // adjust if needed
+    revalidatePath("/host/dashboard/hosted-events"); // adjust if needed
     revalidatePath(`/host/dashboard/event/${eventId}`);
 
     return {
@@ -253,3 +255,119 @@ export const deleteEvent = async (id: string) => {
   }
 };
 
+// all events
+export async function getAllEvents(page = 1, limit = 10) {
+  try {
+    const res = await fetch(
+      `${API_URL}/events/all?page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // cache: "no-store" // optional, if you want fresh data always
+      }
+    );
+
+    const result = await res.json();
+
+    return {
+      success: res.ok,
+      message: result.message || "",
+      data: result.data || [],
+      meta: result.meta || {}, // in case your API returns {meta}
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to fetch events",
+      data: [],
+    };
+  }
+}
+
+// join event
+export const joinEventAction = async (eventId: string) => {
+  try {
+    const cookieStore = cookies();
+    const token = (await cookieStore).get("accessToken")?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        message: "Authentication token missing.",
+      };
+    }
+
+    const res = await fetch(`${API_URL}/events/join/${eventId}`, {
+      method: "POST",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to join event.",
+      };
+    }
+
+    return {
+      success: true,
+      message: result.message || "Joined event successfully!",
+      result: result.data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "Something went wrong.",
+    };
+  }
+};
+
+// leave event
+export const leaveEventAction = async (eventId: string) => {
+  try {
+    const cookieStore = cookies();
+    const token = (await cookieStore).get("accessToken")?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        message: "Authentication token missing.",
+      };
+    }
+
+    const res = await fetch(`${API_URL}/events/leave/${eventId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to leave the event.",
+      };
+    }
+
+    return {
+      success: true,
+      message: result.message || "Successfully left the event.",
+      result: result.data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "Something went wrong.",
+    };
+  }
+};

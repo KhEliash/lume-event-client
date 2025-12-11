@@ -12,7 +12,7 @@ export default function NavClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
-    { href: "/services", label: "Services" },
+    { href: "/events", label: "Events" },
     { href: "/contact", label: "Contact" },
     { href: "/dashboard", label: "Dashboard" },
   ];
