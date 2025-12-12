@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -15,10 +16,16 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { joinEventAction, leaveEventAction } from "@/services/host/event-actions";
+import {
+  joinEventAction,
+  leaveEventAction,
+} from "@/services/host/event-actions";
 import { useRouter } from "next/navigation";
+import { startTransition, useState } from "react";
+import { bookingAction } from "@/services/booking/booking-actions";
 
 export const EventDetails = ({ event, userId }: any) => {
+    console.log(event);
   // Format date
   const eventDate = new Date(event.date);
   const formattedDate = eventDate.toLocaleDateString("en-US", {
@@ -33,42 +40,72 @@ export const EventDetails = ({ event, userId }: any) => {
 
   // --- Buttons text ---
   const isPaid = event.joiningFee > 0;
+  const [guestCount, setGuestCount] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  //   const [bookingState, setBookingState] = useState()
 
-  const joinText = isPaid ? `Book Spot • $${event.joiningFee}` : "Join Event";
+  const isDisabledStatus =
+    event.status === "cancelled" || event.status === "closed";
 
-  const leaveText = "Leave Event";
-  const router = useRouter()
-// join
+  const router = useRouter();
+  // join
   const handleJoin = async () => {
-  toast.loading("Joining...", { id: "join" });
+    toast.loading("Joining...", { id: "join" });
 
-  const res = await joinEventAction(event._id);
+    const res = await joinEventAction(event._id);
 
-  toast.dismiss("join");
+    toast.dismiss("join");
 
-  if (res.success) {
-    toast.success(res.message);
-    // optionally reload UI
-       router.refresh(); 
-  } else {
-    toast.error(res.message);
-  }
-};
+    if (res.success) {
+      toast.success(res.message);
+      // optionally reload UI
+      router.refresh();
+    } else {
+      toast.error(res.message);
+    }
+  };
 
-// leave
-const handleLeave = async () => {
-   
-  const res = await leaveEventAction(event._id);
- 
+  // leave
+  const handleLeave = async () => {
+    const res = await leaveEventAction(event._id);
 
-  if (res.success) {
-    toast.success(res.message);
-    router.refresh();  
-  } else {
-    toast.error(res.message);
-  }
-};
+    if (res.success) {
+      toast.success(res.message);
+      router.refresh();
+    } else {
+      toast.error(res.message);
+    }
+  };
 
+  // booking
+  const handleBooking = () => {
+    startTransition(async () => {
+      setIsLoading(true);
+      toast.loading("Booking your spot...", { id: "booking" });
+
+      const response = await bookingAction(event._id, guestCount);
+
+      toast.dismiss("booking");
+      setIsLoading(false);
+
+      if (response.success) {
+        if (response.result?.paymentUrl) {
+          toast.success(
+            `Spot reserved for ${guestCount} guest(s)! Redirecting to payment...`,
+            { duration: 4000 }
+          );
+          setTimeout(() => {
+            window.location.href = response.result.paymentUrl;
+          }, 2000);
+        } else {
+          toast.success(`Booking successful for ${guestCount} guest(s)!`);
+          router.refresh();
+        }
+      } else {
+        toast.error(response.message || "Booking failed.");
+      }
+    });
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-12 p-4 md:p-10  min-h-screen">
@@ -181,20 +218,75 @@ const handleLeave = async () => {
         {/* Sidebar */}
         <div className="space-y-8 sticky top-10">
           {/* ACTION BUTTON */}
-          <Card className="p-6 border shadow">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Card className="p-6 border shadow space-y-5">
+            <h3 className="text-xl font-bold flex items-center gap-2">
               <User className="text-teal-600" />
               Your Action
             </h3>
 
-            {/* Join / Leave Button */}
-            {isJoined ? (
-              <Button onClick={handleLeave} className="w-full py-5 cursor-pointer" variant="destructive">
-                {leaveText}
+            {/* Show warning if disabled */}
+            {isDisabledStatus && (
+              <p className="text-red-600 font-semibold text-sm">
+                This event is {event.status}. You cannot join or book now.
+              </p>
+            )}
+
+            {isPaid && !isJoined && !isDisabledStatus && (
+              <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
+                <p className="font-semibold text-sm">Guests:</p>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    className="px-3 py-1 bg-white border rounded disabled:opacity-50"
+                    onClick={() =>
+                      setGuestCount((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={guestCount <= 1 || isDisabledStatus}
+                  >
+                    −
+                  </button>
+
+                  <span className="text-lg font-bold">{guestCount}</span>
+
+                  <button
+                    className="px-3 py-1 bg-white border rounded"
+                    onClick={() => setGuestCount((prev) => prev + 1)}
+                    disabled={isDisabledStatus}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!isPaid && !isJoined && (
+              <Button
+                onClick={handleJoin}
+                className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white cursor-pointer"
+                disabled={isDisabledStatus}
+              >
+                Join Event
               </Button>
-            ) : (
-              <Button onClick={handleJoin} className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white cursor-pointer">
-                {joinText}
+            )}
+
+            {isPaid && !isJoined && (
+              <Button
+                onClick={handleBooking}
+                className="w-full py-5 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                disabled={isDisabledStatus}
+              >
+                Book for {guestCount} {guestCount > 1 ? "guests" : "guest"}
+              </Button>
+            )}
+
+            {isJoined && (
+              <Button
+                onClick={handleLeave}
+                variant="destructive"
+                className="w-full py-5 cursor-pointer"
+                disabled={isDisabledStatus}
+              >
+                Leave Event
               </Button>
             )}
           </Card>
@@ -213,8 +305,6 @@ const handleLeave = async () => {
           </Card>
         </div>
       </div>
-
-       
     </div>
   );
 };

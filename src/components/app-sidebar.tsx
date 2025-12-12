@@ -17,7 +17,7 @@ const menuItems = {
   user: [
     { title: "Home", url: "/", icon: "Home" },
     { title: "My Profile", url: "/dashboard/profile", icon: "User" },
-    { title: "Calendar", url: "/dashboard/calendar", icon: "Calendar" },
+    { title: "Joined event", url: "/dashboard/joined-events", icon: "Calendar" },
   ],
   host: [
     { title: "Home", url: "/", icon: "Home" },

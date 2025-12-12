@@ -371,3 +371,46 @@ export const leaveEventAction = async (eventId: string) => {
     };
   }
 };
+
+// my joined events
+export const myJoinedEventAction = async () => {
+  try {
+    const cookieStore = cookies();
+    const token = (await cookieStore).get("accessToken")?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        message: "Authentication token missing.",
+      };
+    }
+
+    const res = await fetch(`${API_URL}/events/joined`, {
+      method: "GET",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to get the event.",
+      };
+    }
+
+    return {
+      success: true,
+      message: result.message || "Successfully get the event.",
+      result: result.data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "Something went wrong.",
+    };
+  }
+};
