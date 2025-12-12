@@ -1,5 +1,4 @@
- // app/payment/fail/page.tsx
-"use client";
+ "use client";
 
 import { XCircleIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";

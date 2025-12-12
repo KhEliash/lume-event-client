@@ -16,6 +16,7 @@ import SidebarClient from "./SidebarClient";
 const menuItems = {
   user: [
     { title: "Home", url: "/", icon: "Home" },
+    { title: "Analytics", url: "/dashboard", icon: "Inbox" },
     { title: "My Profile", url: "/profile", icon: "User" },
     {
       title: "Joined event",
@@ -27,6 +28,7 @@ const menuItems = {
   ],
   host: [
     { title: "Home", url: "/", icon: "Home" },
+    { title: "Analytics", url: "/host/dashboard", icon: "Inbox" },
     { title: "My Profile", url: "/profile", icon: "User" },
 
     {
@@ -42,8 +44,12 @@ const menuItems = {
   ],
   admin: [
     { title: "Admin Home", url: "/", icon: "Home" },
-    { title: "Analytics", url: "/admin/dashboard/analytics", icon: "Inbox" },
-    { title: "Settings", url: "/admin/settings", icon: "Settings" },
+    { title: "Analytics", url: "/admin/dashboard", icon: "Inbox" },
+    {
+      title: "Users Management",
+      url: "/admin/dashboard/allusers",
+      icon: "Settings",
+    },
   ],
 };
 

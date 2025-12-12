@@ -1,11 +1,11 @@
-import React from 'react';
-
-const Analytics = () => {
-    return (
-        <div>
-            analyt
-        </div>
-    );
-};
-
-export default Analytics;
+ import React from 'react';
+ 
+ const Analytic = () => {
+  return (
+    <div>
+      
+    </div>
+  );
+ };
+ 
+ export default Analytic;
