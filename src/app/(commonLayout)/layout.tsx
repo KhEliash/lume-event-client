@@ -1,13 +1,12 @@
-import NavBar from "@/components/shared/NavBar";
-import Footer from "@/components/shared/footer";
-  
+  import Footer from "@/components/shared/footer";
+  import Navbar from "@/components/shared/Navbar";
 const CommonLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
-      <NavBar />
+    <div>
+      <Navbar />
       <div className="min-h-lvh container mx-auto">{children}</div>
       <Footer />
-    </>
+    </div>
   );
 };
 
