@@ -7,7 +7,7 @@ const Reviews = async () => {
   const Me = await getMe();
 
   const myReviews = await getHostReviews(Me.result._id);
-
+console.log(myReviews);
   return (
     <div className="min-h-svh w-full p-6 md:p-10">
       <h1 className="text-2xl text-center font-bold mb-6">My Reviews</h1>

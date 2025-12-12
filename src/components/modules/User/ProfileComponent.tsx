@@ -217,7 +217,7 @@ export function ProfileComponent({ data }: { data: any }) {
       </Card>
 
       {/* Hosted Events List (Visible only if user is a Host) */}
-      {isHost && (
+      {/* {isHost && (
         <div className="pt-4">
           <h3 className="text-2xl font-bold text-gray-800 mb-4">
             Your Hosted Events
@@ -227,7 +227,7 @@ export function ProfileComponent({ data }: { data: any }) {
             hosted events here.]
           </p>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

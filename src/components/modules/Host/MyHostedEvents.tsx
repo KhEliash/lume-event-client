@@ -74,6 +74,7 @@ const MyHostedEvents = async () => {
 
   const { success, message, events } = result;
   const eventList = events?.data || [];
+  // console.log(eventList);
 
   if (!success) {
     return (

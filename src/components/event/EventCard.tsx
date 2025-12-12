@@ -57,11 +57,11 @@ const formatEventDate = (dateString: string, timeString: string) => {
 
 const getStatusBadge = (status: string) => {
   switch (status?.toLowerCase()) {
-    case "active":
+    case "open":
       return { text: "Active", color: "bg-green-500 hover:bg-green-600" };
     case "completed":
       return { text: "Completed", color: "bg-gray-500 hover:bg-gray-600" };
-    case "cancelled":
+    case "closed":
       return { text: "Cancelled", color: "bg-red-500 hover:bg-red-600" };
     default:
       return { text: "Pending", color: "bg-yellow-500 hover:bg-yellow-600" };
@@ -71,7 +71,7 @@ const getStatusBadge = (status: string) => {
 export const EventCard = ({ event }: any) => {
   const { date, time } = formatEventDate(event.date, event.time);
   const statusBadge = getStatusBadge(event.status);
-//   console.log(event);
+    // console.log(event);
 
   return (
     <Link href={`/event/${event._id}`} passHref>

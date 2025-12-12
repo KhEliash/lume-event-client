@@ -8,7 +8,7 @@ const EventUpdate = async ({ params }: { params: { id: string } }) => {
   return (
     <div className="  min-h-svh w-full  p-6 md:p-10">
       <h1 className="text-2xl text-center font-bold mb-6">Create Event</h1>
-      <UpdateEventForm event={event.result} />
+      <UpdateEventForm event={event.data} />
     </div>
   );
 };

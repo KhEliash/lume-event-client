@@ -1,4 +1,4 @@
- /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import {
   Calendar,
@@ -33,15 +33,21 @@ const JoinedEvent: React.FC<JoinedEventProps> = ({ data }) => {
           className="rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-all bg-white overflow-hidden"
         >
           {/* Event Image */}
-          <div className="w-full h-52 bg-gray-100"> {/* Fixed height */}
+          <div className="w-full h-52 bg-gray-100">
+            {" "}
+            {/* Fixed height */}
             {event.eventImage ? (
-              <Image
-                src={event.eventImage}
-                alt={event.name}
-                className="w-full h-full object-cover" // Fixed width + height
-              />
+              <div className="w-full h-48 overflow-hidden rounded-lg">
+                <Image
+                  src={event.eventImage}
+                  alt={event.name}
+                  width={600} // arbitrary, larger than card for quality
+                  height={300} // keep ratio
+                  className="w-full h-full object-fill"
+                />
+              </div>
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <div className="w-full h-48 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
                 No Image Available
               </div>
             )}
@@ -123,11 +129,12 @@ const JoinedEvent: React.FC<JoinedEventProps> = ({ data }) => {
                 )}
               </div>
               <p className="text-sm text-gray-700">
-                Hosted by <span className="font-semibold">{event.host?.fullName}</span>
+                Hosted by{" "}
+                <span className="font-semibold">{event.host?.fullName}</span>
               </p>
               <div className="grid items-end">
                 <Link href={`/event/${event._id}`}>
-                <Button className="bg-blue-500 cursor-pointer">View</Button>
+                  <Button className="bg-blue-500 cursor-pointer">View</Button>
                 </Link>
               </div>
             </div>

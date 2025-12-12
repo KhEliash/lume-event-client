@@ -16,11 +16,19 @@ import SidebarClient from "./SidebarClient";
 const menuItems = {
   user: [
     { title: "Home", url: "/", icon: "Home" },
-    { title: "My Profile", url: "/dashboard/profile", icon: "User" },
-    { title: "Joined event", url: "/dashboard/joined-events", icon: "Calendar" },
+    { title: "My Profile", url: "/profile", icon: "User" },
+    {
+      title: "Joined event",
+      url: "/dashboard/joined-events",
+      icon: "Calendar",
+    },
+    { title: "Reviews", url: "/dashboard/reviews", icon: "Star" },
+    { title: "Payments", url: "/dashboard/payments", icon: "Banknote" },
   ],
   host: [
     { title: "Home", url: "/", icon: "Home" },
+    { title: "My Profile", url: "/profile", icon: "User" },
+
     {
       title: "Create Event",
       url: "/host/dashboard/create-event",
@@ -30,11 +38,6 @@ const menuItems = {
       title: "My Events",
       url: "/host/dashboard/hosted-events",
       icon: "Calendars",
-    },
-    {
-      title: "My Reviews",
-      url: "/host/dashboard/reviews",
-      icon: "Star",
     },
   ],
   admin: [

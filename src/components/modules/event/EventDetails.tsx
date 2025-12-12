@@ -23,9 +23,11 @@ import {
 import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
 import { bookingAction } from "@/services/booking/booking-actions";
+import { CreateReviewDialog } from "../Host/CreateReviewDialoge";
 
-export const EventDetails = ({ event, userId }: any) => {
-    console.log(event);
+export const EventDetails = ({ event, userId, booking }: any) => {
+  console.log(event);
+  console.log(booking);
   // Format date
   const eventDate = new Date(event.date);
   const formattedDate = eventDate.toLocaleDateString("en-US", {
@@ -46,6 +48,7 @@ export const EventDetails = ({ event, userId }: any) => {
 
   const isDisabledStatus =
     event.status === "cancelled" || event.status === "closed";
+  const Payment = booking == "No booking found";
 
   const router = useRouter();
   // join
@@ -218,20 +221,20 @@ export const EventDetails = ({ event, userId }: any) => {
         {/* Sidebar */}
         <div className="space-y-8 sticky top-10">
           {/* ACTION BUTTON */}
-          <Card className="p-6 border shadow space-y-5">
+          {/* <Card className="p-6 border shadow space-y-5">
             <h3 className="text-xl font-bold flex items-center gap-2">
               <User className="text-teal-600" />
               Your Action
             </h3>
 
-            {/* Show warning if disabled */}
+            
             {isDisabledStatus && (
               <p className="text-red-600 font-semibold text-sm">
                 This event is {event.status}. You cannot join or book now.
               </p>
             )}
 
-            {isPaid && !isJoined && !isDisabledStatus && (
+            {isPaid && payment?.status === "CANCEL" && !isJoined && !isDisabledStatus && (
               <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
                 <p className="font-semibold text-sm">Guests:</p>
 
@@ -259,7 +262,7 @@ export const EventDetails = ({ event, userId }: any) => {
               </div>
             )}
 
-            {!isPaid && !isJoined && (
+            {!isPaid && !isJoined && payment.status === "COMPLETE" && (
               <Button
                 onClick={handleJoin}
                 className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white cursor-pointer"
@@ -269,7 +272,7 @@ export const EventDetails = ({ event, userId }: any) => {
               </Button>
             )}
 
-            {isPaid && !isJoined && (
+            {isPaid && Payment &&!isJoined && (
               <Button
                 onClick={handleBooking}
                 className="w-full py-5 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
@@ -279,7 +282,7 @@ export const EventDetails = ({ event, userId }: any) => {
               </Button>
             )}
 
-            {isJoined && (
+            {isJoined && event.status == "open" && (
               <Button
                 onClick={handleLeave}
                 variant="destructive"
@@ -289,7 +292,135 @@ export const EventDetails = ({ event, userId }: any) => {
                 Leave Event
               </Button>
             )}
-          </Card>
+            {isJoined && payment.status == "COMPLETE" && (
+              <Button
+                onClick={handleLeave}
+                variant="outline"
+                className="w-full py-5 cursor-pointer"
+                disabled={isDisabledStatus}
+              >
+                Completed
+              </Button>
+            )}
+          </Card> */}
+
+
+<Card className="p-6 border shadow space-y-5">
+  <h3 className="text-xl font-bold flex items-center gap-2">
+    <User className="text-teal-600" />
+    Your Action
+  </h3>
+
+  {/* ------------------ GLOBAL DISABLED MESSAGE ------------------ */}
+  {event.status !== "open" && (
+    <p className="text-red-600 font-semibold text-sm">
+      This event is {event.status}. You cannot join or book now.
+    </p>
+  )}
+
+  {/* ========================= FREE EVENT ========================= */}
+  {!isPaid && event.status === "open" && (
+    <>
+      {!isJoined ? (
+        <Button
+          onClick={handleJoin}
+          className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white"
+        >
+          Join Event
+        </Button>
+      ) : (
+        <Button
+          onClick={handleLeave}
+          variant="destructive"
+          className="w-full py-5"
+        >
+          Leave Event
+        </Button>
+      )}
+    </>
+  )}
+
+  {/* ========================= PAID EVENT ========================= */}
+  {isPaid && event.status === "open" && (
+    <>
+      {/* Already Joined */}
+      {isJoined && (
+        <Button
+          onClick={handleLeave}
+          variant="destructive"
+          className="w-full py-5"
+        >
+          Leave Event
+        </Button>
+      )}
+
+      {/* Payment Complete → show JOIN button */}
+      {!isJoined && booking?.status === "COMPLETE" && (
+        <Button
+          onClick={handleJoin}
+          className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white"
+        >
+          Join Event
+        </Button>
+      )}
+
+      {/* Payment Cancelled / Pending / No payment → Guest count + Book */}
+      {!isJoined &&
+        (booking?.status === "CANCEL" ||
+          booking?.status === "PENDING" ||
+          Payment) && (
+          <>
+            {/* Guest Counter */}
+            <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
+              <p className="font-semibold text-sm">Guests:</p>
+
+              <div className="flex items-center gap-3">
+                <button
+                  className="px-3 py-1 bg-white border rounded"
+                  onClick={() =>
+                    setGuestCount((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={guestCount <= 1}
+                >
+                  −
+                </button>
+
+                <span className="text-lg font-bold">{guestCount}</span>
+
+                <button
+                  className="px-3 py-1 bg-white border rounded"
+                  onClick={() => setGuestCount((prev) => prev + 1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleBooking}
+              className="w-full py-5 bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Book for {guestCount} {guestCount > 1 ? "guests" : "guest"}
+            </Button>
+          </>
+        )}
+    </>
+  )}
+
+  {/* ========================= EVENT COMPLETED ========================= */}
+  {event.status === "completed" && isJoined && (
+    <Button
+      variant="outline"
+      className="w-full py-5"
+      disabled
+    >
+      Completed
+    </Button>
+  )}
+</Card>
+
+
+
 
           {/* Location */}
           <Card className="p-6 border shadow">
@@ -303,6 +434,20 @@ export const EventDetails = ({ event, userId }: any) => {
               Map Preview
             </div>
           </Card>
+          {/* review */}
+
+          {event.status == "completed" ? (
+            <Card className="p-6 border shadow">
+              <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                <Star className="text-red-600" />
+                Review
+              </h3>
+              {/* /button */}
+              <CreateReviewDialog eventId={event._id} userId={userId} />
+            </Card>
+          ) : (
+            ""
+          )}
         </div>
       </div>
     </div>

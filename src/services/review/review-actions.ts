@@ -12,6 +12,7 @@ export const getHostReviews = async (
   page: number = 1,
   limit: number = 10
 ): Promise<HostReviewsResponse> => {
+  console.log(hostId);
   try {
     const cookieStore = cookies();
     const token = (await cookieStore).get("accessToken")?.value;
@@ -100,6 +101,36 @@ export async function updateReviewAction(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+
+    return {
+      success: res.ok,
+      message: result.message,
+      data: result.data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
+// create
+export async function createReviewAction(payload: any) {
+  console.log(payload);
+  try {
+    const token = (await cookies()).get("accessToken")?.value;
+
+    const res = await fetch(`${API_URL}/reviews/create`, {
+      method: "POST",
+      headers: {
+        Authorization: token || "",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
     });
 
     const result = await res.json();

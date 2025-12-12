@@ -63,8 +63,8 @@ export default async function EventDetailsPage({
     );
   }
 
-  const events = resultEvent.result;
-
+  const events = resultEvent.data;
+console.log(events);
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
       {/* Back Button */}

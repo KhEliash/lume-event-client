@@ -58,6 +58,7 @@ export const getMe = async () => {
 
 // update profile
 export const updateProfileAction = async (userId: string, data: any) => {
+  
   try {
     const cookieStore = cookies();
     const token = (await cookieStore).get("accessToken")?.value;

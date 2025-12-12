@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- "use client";
+"use client";
 
 import { useState, useTransition, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -15,7 +15,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormField, FormItem, FormMessage, FormLabel, FormControl } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormMessage,
+  FormLabel,
+  FormControl,
+} from "@/components/ui/form";
 import { updateProfileAction } from "@/services/user/userprofile";
 
 // your actions
@@ -76,7 +83,7 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
   const uploadImage = () => {
     if (!file) return toast.warning("Select a file first");
 
-console.log(file);
+    // console.log(file);
 
     // startTransition(async () => {
     //   const res = await updateProfileImageAction(file, user._id);
@@ -93,6 +100,7 @@ console.log(file);
 
   // ---------- Submit Data ----------
   const onSubmit = (values: ProfileFormValues) => {
+    console.log(values.phone);
     const payload = {
       fullName: values.fullName,
       bio: values.bio,
@@ -105,42 +113,53 @@ console.log(file);
         ? values.interests.split(",").map((i) => i.trim())
         : [],
     };
-console.log(values);
+    console.log(values);
 
-   startTransition(async () => {
-  const res = await updateProfileAction(user._id, payload);
+    startTransition(async () => {
+      const res = await updateProfileAction(user._id, payload);
 
-  if (res.success) {
-    toast.success(res.message);
-  } else {
-    toast.error(res.message);
-  }
-});
+      if (res.success) {
+        toast.success(res.message);
+        window.location.href = "/profile";
+      } else {
+        toast.error(res.message);
+      }
+    });
   };
 
   const imageToShow = preview || user.profileImage;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-
+    <div className="max-w-3xl mt-12 mx-auto space-y-8">
+      <h1 className="text-center font-semibold text-2xl"> Update</h1>
       {/* Image Section */}
       <Card>
         <CardHeader>
           <CardTitle>Profile Picture</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-6 items-center">
-
           {/* Image Preview */}
           <div className="relative w-28 h-28 rounded-full overflow-hidden border">
             {imageToShow ? (
-              <Image src={imageToShow} alt="avatar" fill className="object-cover" />
+              <Image
+                src={imageToShow}
+                alt="avatar"
+                fill
+                className="object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200">
                 <UserIcon className="w-10 h-10 text-gray-500" />
               </div>
             )}
 
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFile}
+            />
 
             {!file && (
               <button
@@ -168,8 +187,16 @@ console.log(values);
           {/* Upload */}
           <div className="flex-1">
             {file ? (
-              <Button onClick={uploadImage} disabled={isPending} className="bg-green-600 text-white">
-                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Upload Image"}
+              <Button
+                onClick={uploadImage}
+                disabled={isPending}
+                className="bg-green-600 text-white"
+              >
+                {isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Upload Image"
+                )}
               </Button>
             ) : (
               <p className="text-gray-500 text-sm">Choose an image to upload</p>
@@ -186,7 +213,6 @@ console.log(values);
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
               {/* Full Name */}
               <FormField
                 name="fullName"
@@ -210,7 +236,11 @@ console.log(values);
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Phone number" />
+                      <Input
+                        {...field}
+                        type="number"
+                        placeholder="Phone number"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -225,7 +255,11 @@ console.log(values);
                   <FormItem>
                     <FormLabel>Bio</FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={4} placeholder="Write something..." />
+                      <Textarea
+                        {...field}
+                        rows={4}
+                        placeholder="Write something..."
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -276,10 +310,17 @@ console.log(values);
               />
 
               {/* Submit */}
-              <Button type="submit" disabled={isPending} className="w-full bg-blue-600">
-                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Changes"}
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full bg-blue-600"
+              >
+                {isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
-
             </form>
           </Form>
         </CardContent>

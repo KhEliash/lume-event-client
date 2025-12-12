@@ -49,8 +49,7 @@ const formatDate = (dateString: string) => {
 
 export default function HostReviewList({ reviews }: { reviews: any[] }) {
   const [isPending, startTransition] = useTransition();
-  console.log(reviews); // Keep existing code structure
-
+ 
   const handleDelete = (reviewId: string) => {
     startTransition(async () => {
       const res = await deleteReviewAction(reviewId);
