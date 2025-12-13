@@ -44,6 +44,7 @@ const menuItems = {
   ],
   admin: [
     { title: "Admin Home", url: "/", icon: "Home" },
+    { title: "My Profile", url: "/profile", icon: "User" },
     { title: "Analytics", url: "/admin/dashboard", icon: "Inbox" },
     {
       title: "Users Management",
