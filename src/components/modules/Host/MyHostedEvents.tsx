@@ -90,7 +90,7 @@ const MyHostedEvents = async () => {
       <div className="text-center text-gray-500 font-medium p-8 border-dashed border-2 border-gray-300 rounded-lg bg-gray-50">
         <h1 className="text-2xl mb-2">No Hosted Events Found</h1>
         You have not hosted any events yet.{" "}
-        <Link href="/host/create" className="text-blue-600 hover:underline">
+        <Link href="/host/dashboard/create-event" className="text-blue-600 hover:underline">
           Create one now!
         </Link>
       </div>

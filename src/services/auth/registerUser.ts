@@ -12,6 +12,7 @@ export const registerUser = async (
       password: formData.get("password"),
       email: formData.get("email"),
       fullName: formData.get("name"),
+      role:formData.get("role")
     };
 
     const res = await fetch(`${API_URL}/users/register`, {

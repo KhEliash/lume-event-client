@@ -166,7 +166,7 @@ export const updateEventAction = async (
   try {
     const cookieStore = cookies();
     const token = (await cookieStore).get("accessToken")?.value;
-
+console.log(formData);
     if (!token) {
       return {
         success: false,
@@ -183,7 +183,7 @@ export const updateEventAction = async (
     });
 
     const result = await res.json();
-
+console.log(result);
     if (!res.ok) {
       return {
         success: false,

@@ -51,13 +51,14 @@ export function UpdateEventForm({ event }: UpdateEventFormProps) {
     initialState
   );
 
-  const form = useForm<EventFormValues>({
+  const form = useForm({
     defaultValues: {
       name: event.name || "",
       type: event?.type || EventType.OTHER,
       description: event?.description || "",
       date: event?.date ? new Date(event?.date) : undefined,
       time: event?.time || "19:00",
+      status: event?.status || "",
       address: event?.location?.address || "",
       city: event?.location?.city || "",
       minParticipants: event?.minParticipants || 1,
@@ -69,7 +70,7 @@ export function UpdateEventForm({ event }: UpdateEventFormProps) {
 
   const handleRHFSubmit = form.handleSubmit((values) => {
     const formData = new FormData();
-
+    console.log(formData.get("status"));
     for (const key in values) {
       if (Object.prototype.hasOwnProperty.call(values, key)) {
         const value = values[key as keyof EventFormValues];
@@ -142,6 +143,30 @@ export function UpdateEventForm({ event }: UpdateEventFormProps) {
                         type.slice(1).toLowerCase().replace(/_/g, " ")}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="status"
+          defaultValue="open"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl className="w-full">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
