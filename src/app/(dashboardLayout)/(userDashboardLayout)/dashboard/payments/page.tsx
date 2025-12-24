@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- import { getMyPayments } from "@/services/payment/payments";
-import { DollarSign, Calendar, Users, Zap, Tag, Clock } from "lucide-react";
+import { getMyPayments } from "@/services/payment/payments";
+import { Calendar, Users, Zap, Tag, Clock, ReceiptText } from "lucide-react";
 import React from "react";
 
 const formatDate = (dateStr: string | number | Date) => {
@@ -14,48 +14,60 @@ const formatDate = (dateStr: string | number | Date) => {
 };
 
 const getStatusClasses = (status: string) => {
+  const base =
+    "px-3 py-1 border-2 font-black text-[10px] uppercase tracking-widest ";
   switch (status?.toUpperCase()) {
     case "PAID":
-      return "bg-green-500 text-white shadow-md shadow-green-200";
     case "COMPLETE":
-      return "bg-blue-500 text-white shadow-md shadow-blue-200";
+      return (
+        base +
+        "bg-emerald-100 border-emerald-950 text-emerald-950 shadow-[2px_2px_0px_0px_rgba(6,78,59,1)]"
+      );
     case "FAILED":
-      return "bg-red-500 text-white shadow-md shadow-red-200";
+      return (
+        base +
+        "bg-red-100 border-red-950 text-red-950 shadow-[2px_2px_0px_0px_rgba(153,27,27,1)]"
+      );
     case "UNPAID":
-      return "bg-yellow-500 text-white shadow-md shadow-yellow-200";
+      return (
+        base +
+        "bg-amber-100 border-amber-950 text-amber-950 shadow-[2px_2px_0px_0px_rgba(251,191,36,1)]"
+      );
     default:
-      return "bg-gray-500 text-white shadow-md shadow-gray-200";
+      return base + "bg-gray-100 border-gray-950 text-gray-950";
   }
 };
 
 const Payments = async () => {
   const response = await getMyPayments();
-  const payments = response.reviews || [];
+  const payments = response.reviews || []; // Note: Ensure your API returns .reviews or .result
 
   return (
-    <div className="p-6 max-w-6xl mx-auto min-h-screen">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
-          💳 Transaction History
-        </h1>
-        <p className="text-gray-500 mt-2">
-          A record of all bookings and payments for events you&apos;ve joined.
-        </p>
+    <div className="p-4 md:p-10  space-y-10 min-h-screen">
+      {/* Header Section */}
+      <div className="border-b-4 border-emerald-950 pb-6 flex flex-col md:flex-row justify-between items-end gap-4">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-black text-emerald-950 uppercase tracking-tighter">
+            Financial Ledger
+          </h1>
+          <p className="text-amber-600 font-bold text-xs uppercase tracking-[0.2em] mt-2">
+            Verified transactions & booking receipts
+          </p>
+        </div>
+        <div className="flex items-center gap-2 bg-emerald-950 text-amber-400 px-4 py-2 border-2 border-emerald-950 font-black text-sm uppercase">
+          <ReceiptText size={18} /> Total Records: {payments.length}
+        </div>
       </div>
 
       {payments.length === 0 ? (
-        <div className="text-center p-12 border-2 border-dashed border-gray-300 rounded-xl bg-white shadow-lg">
-          <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-xl text-gray-700 font-semibold">
-            No payment records found.
-          </p>
-          <p className="text-gray-500 mt-1">
-            Your transactions will appear here after you book and pay for an
-            event.
+        <div className="text-center py-24 border-4 border-dashed border-emerald-950/10">
+          <Zap className="w-12 h-12 text-emerald-950/20 mx-auto mb-4" />
+          <p className="text-emerald-950/40 font-black uppercase tracking-widest text-sm">
+            No financial signals detected in your history.
           </p>
         </div>
       ) : (
-        <div className="grid gap-8">
+        <div className="grid lg:grid-cols-2 gap-6">
           {payments.map((payment: any) => {
             const { booking, amount, status, transactionId, createdAt, _id } =
               payment;
@@ -64,59 +76,59 @@ const Payments = async () => {
             return (
               <div
                 key={_id}
-                className="border-t-4 border-indigo-500 rounded-xl shadow-2xl p-6 lg:p-8 bg-white transition duration-300 hover:shadow-3xl flex flex-col md:flex-row justify-between items-start md:items-stretch"
+                className="group relative bg-white border-2 border-emerald-950 p-6 md:p-8 hover:shadow-[10px_10px_0px_0px_rgba(6,78,59,1)] transition-all flex flex-col md:flex-row justify-between"
               >
-                <div className="space-y-4 flex-1 pr-0 md:pr-8 w-full md:w-auto">
-                  <div className="flex justify-between items-start">
-                    <h2 className="text-2xl font-extrabold text-gray-800 leading-tight">
-                      {event.name || "Unknown Event"}
+                {/* Event & Status Info */}
+                <div className="flex-1 space-y-6">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <h2 className="text-2xl font-black text-emerald-950 uppercase tracking-tighter group-hover:text-amber-600 transition-colors">
+                      {event.name || "UNIDENTIFIED MISSION"}
                     </h2>
-                    <span
-                      className={`px-4 py-1.5 rounded-full font-bold text-xs shrink-0 ${getStatusClasses(
-                        status
-                      )}`}
-                    >
-                      {status?.toUpperCase() || "N/A"}
+                    <span className={getStatusClasses(status)}>
+                      {status || "PENDING"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-sm text-gray-600 border-t pt-4 mt-4">
-                    <p className="flex items-center gap-2">
-                      <Calendar size={16} className="text-blue-600" />
-                      <span className="font-semibold">Event Date:</span>{" "}
-                      {formatDate(event.date)}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Users size={16} className="text-teal-600" />
-                      <span className="font-semibold">Guests:</span>{" "}
-                      {booking?.guestCount || 1}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Clock size={16} className="text-pink-600" />
-                      <span className="font-semibold">Booked On:</span>{" "}
-                      {formatDate(createdAt)}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Tag size={16} className="text-orange-600" />
-                      <span className="font-semibold">Unit Fee:</span> $
-                      {event.joiningFee?.toFixed(2) || "N/A"}
+                  {/* Metadata Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t-2 border-dotted border-emerald-950/20 pt-6">
+                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-emerald-950/60">
+                      <Calendar size={14} className="text-amber-500" />
+                      <span>Event: {formatDate(event.date)}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-emerald-950/60">
+                      <Users size={14} className="text-amber-500" />
+                      <span>Units: {booking?.guestCount || 1} Person(s)</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-emerald-950/60">
+                      <Clock size={14} className="text-amber-500" />
+                      <span>Logged: {formatDate(createdAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-emerald-950/60">
+                      <Tag size={14} className="text-amber-500" />
+                      <span>Rate: {event.joiningFee || 0} USD</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Amount & Transaction ID Section */}
+                <div className="mt-8 md:mt-0 md:ml-10 md:pl-10 md:border-l-2 md:border-emerald-950 flex flex-col justify-center items-start md:items-end min-w-[200px]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-950/40 mb-1">
+                    Settlement Amount
+                  </p>
+                  <p className="text-4xl font-black text-emerald-950 flex items-center">
+                    <span className="text-sm mr-1">USD</span>
+                    {amount?.toLocaleString() || "0.00"}
+                  </p>
+                  <div className="mt-4 p-2 bg-emerald-50 border border-emerald-950/10 w-full md:w-auto">
+                    <p className="text-[9px] font-bold text-emerald-800 break-all uppercase tracking-tighter">
+                      TXID: {transactionId || "INTERNAL_CREDIT"}
                     </p>
                   </div>
                 </div>
 
-                <div className="w-full md:w-64 flex flex-col items-start md:items-end justify-between md:border-l md:pl-6 pt-4 md:pt-0">
-                  <div className="flex flex-col items-start md:items-end mb-4">
-                    <p className="text-3xl font-extrabold text-green-700 flex items-center gap-1">
-                      <DollarSign size={24} className="text-green-600" />$
-                      {amount?.toFixed(2) || "0.00"}
-                    </p>
-                    <p className="text-sm text-gray-500 font-medium">
-                      TOTAL PAID
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-500 break-all">
-                    **Transaction ID:** {transactionId || "N/A"}
-                  </p>
+                {/* Decorative "Stamp" Effect */}
+                <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Zap size={80} className="text-emerald-950" />
                 </div>
               </div>
             );
