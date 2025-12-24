@@ -4,9 +4,8 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Users,
-  Wallet,
   User as UserIcon,
+  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "../ui/button";
@@ -19,122 +18,100 @@ interface JoinedEventProps {
 const JoinedEvent: React.FC<JoinedEventProps> = ({ data }) => {
   if (!data || data.length === 0) {
     return (
-      <div className="w-full text-center py-10 text-gray-500 text-lg">
-        No joined events found.
+      <div className="w-full border-4 border-dashed border-emerald-950/20 py-20 text-center">
+        <p className="text-emerald-950/40 font-black uppercase tracking-widest text-sm">
+          No transmissions found. Join an event to see it here.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
       {data.map((event) => (
         <div
           key={event._id}
-          className="rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-all bg-white overflow-hidden"
+          className="group relative bg-white border-2 border-emerald-950 hover:shadow-[8px_8px_0px_0px_rgba(6,78,59,1)] transition-all duration-300"
         >
-          {/* Event Image */}
-          <div className="w-full h-52 bg-gray-100">
-            {" "}
-            {/* Fixed height */}
-            {event.eventImage ? (
-              <div className="w-full h-48 overflow-hidden rounded-lg">
+          {/* Status Badge - Floating */}
+          <div
+            className={`absolute top-4 right-4 z-10 px-3 py-1 text-[10px] font-black uppercase tracking-widest border-2 border-emerald-950 ${
+              event.status === "open"
+                ? "bg-amber-400 text-emerald-950"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {event.status}
+          </div>
+
+          <div className="flex flex-col md:flex-row h-full">
+            {/* Image Section */}
+            <div className="relative w-full md:w-48 h-48 md:h-auto overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-emerald-950 bg-emerald-50">
+              {event.eventImage ? (
                 <Image
                   src={event.eventImage}
                   alt={event.name}
-                  width={600} // arbitrary, larger than card for quality
-                  height={300} // keep ratio
-                  className="w-full h-full object-fill"
+                  fill
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                 />
-              </div>
-            ) : (
-              <div className="w-full h-48 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg">
-                No Image Available
-              </div>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="p-5">
-            {/* Title */}
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              {event.name}
-            </h2>
-
-            {/* Description */}
-            <p className="text-gray-600 text-sm mb-4">{event.description}</p>
-
-            {/* Date & Time */}
-            <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
-              <div className="flex items-center gap-1">
-                <Calendar size={16} />
-                <span>{new Date(event.date).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock size={16} />
-                <span>{event.time}</span>
-              </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-emerald-950/20">
+                  <UserIcon size={40} />
+                </div>
+              )}
             </div>
 
-            {/* Location */}
-            <div className="flex items-center gap-2 text-sm text-gray-700 mb-3">
-              <MapPin size={16} />
-              <span>
-                {event.location?.address}, {event.location?.city}
-              </span>
-            </div>
-
-            {/* Joining Fee */}
-            <div className="flex items-center gap-2 text-sm text-gray-700 mb-3">
-              <Wallet size={16} />
-              <span>
-                Joining Fee:{" "}
-                {event.joiningFee > 0 ? (
-                  <span className="font-semibold">{event.joiningFee} Taka</span>
-                ) : (
-                  <span className="font-semibold">Free</span>
-                )}
-              </span>
-            </div>
-
-            {/* Participants */}
-            <div className="flex items-center gap-2 text-sm text-gray-700 mb-3">
-              <Users size={16} />
-              <span>
-                {event.currentParticipants}/{event.maxParticipants} Participants
-              </span>
-            </div>
-
-            {/* Status */}
-            <span
-              className={`inline-block px-3 py-1 text-xs rounded-full ${
-                event.status === "open"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-600"
-              }`}
-            >
-              {event.status.toUpperCase()}
-            </span>
-
-            {/* Host */}
-            <div className="flex items-center gap-3 mt-5 w-full justify-between">
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                {event.host?.profileImage ? (
-                  <Image
-                    src={event.host.profileImage}
-                    alt="Host"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <UserIcon size={20} className="text-gray-500" />
-                )}
+            {/* Content Section */}
+            <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+              <div>
+                <h2 className="text-2xl font-black text-emerald-950 uppercase tracking-tighter leading-none mb-2">
+                  {event.name}
+                </h2>
+                <p className="text-sm text-emerald-900/70 line-clamp-2 font-medium italic">
+                  &quot;{event.description}&quot;
+                </p>
               </div>
-              <p className="text-sm text-gray-700">
-                Hosted by{" "}
-                <span className="font-semibold">{event.host?.fullName}</span>
-              </p>
-              <div className="grid items-end">
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-y-3 gap-x-2 border-t border-emerald-950/10 pt-4">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-950/60">
+                  <Calendar size={14} className="text-amber-500" />
+                  <span>{new Date(event.date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-950/60">
+                  <Clock size={14} className="text-amber-500" />
+                  <span>{event.time}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-950/60 col-span-2">
+                  <MapPin size={14} className="text-amber-500" />
+                  <span className="truncate">{event.location?.city}</span>
+                </div>
+              </div>
+
+              {/* Bottom Footer */}
+              <div className="flex items-center justify-between pt-4 border-t-2 border-emerald-950 border-dotted">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full border border-emerald-950 overflow-hidden bg-emerald-100">
+                    {event.host?.profileImage ? (
+                      <Image
+                        src={event.host.profileImage}
+                        width={32}
+                        height={32}
+                        alt="H"
+                      />
+                    ) : (
+                      <UserIcon size={16} className="m-2" />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-tighter text-emerald-950">
+                    {event.host?.fullName?.split(" ")[0]}
+                  </span>
+                </div>
+
                 <Link href={`/event/${event._id}`}>
-                  <Button className="bg-blue-500 cursor-pointer">View</Button>
+                  <Button className="rounded-none bg-emerald-950 text-amber-400 hover:bg-amber-400 hover:text-emerald-950 font-black uppercase text-[10px] tracking-widest h-9 border-2 border-emerald-950 transition-colors">
+                    View <ArrowRight size={14} className="ml-2" />
+                  </Button>
                 </Link>
               </div>
             </div>
