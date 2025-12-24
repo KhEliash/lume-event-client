@@ -1,62 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarGroupContent,
+  SidebarHeader,
 } from "@/components/ui/sidebar";
-
 import SidebarClient from "./SidebarClient";
+import { CalendarDays } from "lucide-react";
 
-// Menu items by role — IMPORTANT: icons replaced with string keys
 const menuItems = {
   user: [
-    { title: "Home", url: "/", icon: "Home" },
-    { title: "Analytics", url: "/dashboard", icon: "Inbox" },
-    { title: "My Profile", url: "/profile", icon: "User" },
+    { title: "Dashboard", url: "/dashboard", icon: "LayoutDashboard" },
     {
-      title: "Joined event",
+      title: "Joined Events",
       url: "/dashboard/joined-events",
-      icon: "Calendar",
+      icon: "CalendarCheck",
     },
-    { title: "Reviews", url: "/dashboard/reviews", icon: "Star" },
-    { title: "Payments", url: "/dashboard/payments", icon: "Banknote" },
+    { title: "My Reviews", url: "/dashboard/reviews", icon: "Star" },
+    { title: "Transactions", url: "/dashboard/payments", icon: "Ticket" },
+    { title: "My Profile", url: "/profile", icon: "User" },
+    { title: "Back to Home", url: "/", icon: "ArrowLeft" },
   ],
   host: [
-    { title: "Home", url: "/", icon: "Home" },
-    { title: "Analytics", url: "/host/dashboard", icon: "Inbox" },
-    { title: "My Profile", url: "/profile", icon: "User" },
-
+    { title: "Host Stats", url: "/host/dashboard", icon: "BarChart3" },
     {
       title: "Create Event",
       url: "/host/dashboard/create-event",
-      icon: "BadgePlus",
+      icon: "PlusSquare",
     },
     {
-      title: "My Events",
+      title: "Managed Events",
       url: "/host/dashboard/hosted-events",
-      icon: "Calendars",
+      icon: "Calendar",
     },
+    { title: "My Profile", url: "/profile", icon: "User" },
+    { title: "Back to Home", url: "/", icon: "ArrowLeft" },
   ],
   admin: [
-    { title: "Admin Home", url: "/", icon: "Home" },
+    { title: "Command Center", url: "/admin/dashboard", icon: "ShieldAlert" },
+    { title: "User Control", url: "/admin/dashboard/allusers", icon: "Users2" },
+    { title: "Platform Logs", url: "/admin/dashboard/logs", icon: "Database" },
     { title: "My Profile", url: "/profile", icon: "User" },
-    { title: "Analytics", url: "/admin/dashboard", icon: "Inbox" },
-    {
-      title: "Users Management",
-      url: "/admin/dashboard/allusers",
-      icon: "Settings",
-    },
+    { title: "Back to Home", url: "/", icon: "ArrowLeft" },
   ],
 };
 
 export default async function AppSidebar() {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("accessToken")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
 
   let role: keyof typeof menuItems = "user";
 
@@ -65,21 +59,34 @@ export default async function AppSidebar() {
       const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
       role = decoded.role || "user";
     } catch (e) {
-      console.error("JWT verify failed", e);
+      console.error("Auth failed", e);
     }
   }
 
-  const items = menuItems[role];
-
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar className="border-r-4 border-emerald-950 bg-white">
+      <SidebarHeader className="p-6 border-b-2 border-emerald-950">
+        <div className="flex items-center gap-3">
+          <div className="bg-emerald-950 p-2 text-amber-400">
+            <CalendarDays size={20} />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-black text-emerald-950 leading-none uppercase tracking-tighter">
+              Lume Event
+            </span>
+            <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">
+              {role} Panel
+            </span>
+          </div>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="p-4 bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
-            {/* Passing SAFE JSON-serializable data */}
-            <SidebarClient items={items} />
-          </SidebarGroupContent>
+          <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-950/30 mb-4 px-2">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarClient items={menuItems[role]} />
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
