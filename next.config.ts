@@ -1,18 +1,10 @@
-// import type { NextConfig } from "next";
-
-// const nextConfig: NextConfig = {
-//   /* config options here */
-//   reactCompiler: true,
-// };
-
-// export default nextConfig;
-
-
 /** @type {import('next').NextConfig} */
-const nextConfig: import('next').NextConfig = {
+const nextConfig: import("next").NextConfig = {
+  reactCompiler: true,
+
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb', // adjust as needed
+      bodySizeLimit: "10mb", // adjust as needed
     },
   },
   images: {
