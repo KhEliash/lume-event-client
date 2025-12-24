@@ -3,7 +3,6 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -15,22 +14,30 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Star, Calendar, Zap, User as UserIcon } from "lucide-react"; // Added UserIcon, Calendar, Zap
+import {
+  Trash2,
+  Star,
+  Calendar,
+  Zap,
+  User as UserIcon,
+  Quote,
+} from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { deleteReviewAction } from "@/services/review/review-actions";
 import { UpdateReviewDialog } from "./UpdateReviewDialog";
 
-// Utility to display full/empty stars
 const StarDisplay = ({ rating }: { rating: number }) => {
   return (
-    <div className="flex items-center space-x-0.5">
+    <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          size={16}
+          size={14}
           className={
-            star <= rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+            star <= rating
+              ? "text-amber-500 fill-amber-500"
+              : "text-emerald-950/10"
           }
         />
       ))}
@@ -38,7 +45,6 @@ const StarDisplay = ({ rating }: { rating: number }) => {
   );
 };
 
-// Utility to format date
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
@@ -49,138 +55,140 @@ const formatDate = (dateString: string) => {
 
 export default function HostReviewList({ reviews }: { reviews: any[] }) {
   const [isPending, startTransition] = useTransition();
- 
+
   const handleDelete = (reviewId: string) => {
     startTransition(async () => {
       const res = await deleteReviewAction(reviewId);
-      if (res.success) toast.success("Review deleted!");
+      if (res.success) toast.success("Transmission deleted.");
       else toast.error("Failed to delete review.");
     });
   };
 
   if (!reviews || reviews.length === 0)
     return (
-      <p className="text-gray-500 p-4 border rounded-lg bg-gray-50">
-        No reviews have been left by participants yet.
-      </p>
+      <div className="w-full border-4 border-dashed border-emerald-950/20 py-20 text-center">
+        <p className="text-emerald-950/40 font-black uppercase tracking-widest text-sm">
+          No feedback signals received yet.
+        </p>
+      </div>
     );
 
   return (
-    <div className="space-y-6 grid md:grid-cols-2">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {reviews.map((review) => (
-        <Card
+        <div
           key={review._id}
-          className="shadow-lg border-2 border-gray-100 hover:border-blue-200 transition-colors"
+          className="relative bg-white border-2 border-emerald-950 p-6 md:p-8 flex flex-col justify-between hover:shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] transition-all group"
         >
-          <CardContent className="p-6 flex flex-col">
-            {/* TOP BAR: Reviewer Info & Actions */}
-            <div className="flex justify-between items-start pb-4 border-b border-gray-100 mb-4">
-              {/* Reviewer Info */}
-              <div className="flex items-center gap-4">
+          {/* Action Header */}
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center gap-4">
+              <div className="relative w-14 h-14 border-2 border-emerald-950 overflow-hidden bg-emerald-50">
                 {review.reviewer.profileImage ? (
                   <Image
                     src={review.reviewer.profileImage}
                     alt={review.reviewer.fullName}
-                    width={56}
-                    height={56}
-                    className="rounded-full object-cover border-2 border-gray-200"
+                    fill
+                    className="object-cover grayscale group-hover:grayscale-0 transition-all"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl">
-                    {review.reviewer.fullName[0]}
+                  <div className="w-full h-full flex items-center justify-center text-emerald-950/20">
+                    <UserIcon size={24} />
                   </div>
                 )}
-
-                <div>
-                  <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                    <UserIcon size={18} className="text-blue-500" />
-                    {review.reviewer.fullName}
-                  </h3>
-
-                  {/* Star Rating */}
-                  <StarDisplay rating={review.rating} />
-                </div>
               </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 leading-none mb-1">
+                  Participant
+                </p>
+                <h3 className="font-black text-lg text-emerald-950 uppercase tracking-tighter">
+                  {review.reviewer.fullName}
+                </h3>
+                <StarDisplay rating={review.rating} />
+              </div>
+            </div>
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                {/* Update (Edit) - Optional for host, usually only reviewer can edit */}
+            <div className="flex gap-2">
+              <UpdateReviewDialog
+                reviewId={review._id}
+                defaultValues={{
+                  rating: review.rating,
+                  comment: review.comment,
+                }}
+              />
 
-                <UpdateReviewDialog
-                  reviewId={review._id}
-                  defaultValues={{
-                    rating: review.rating,
-                    comment: review.comment,
-                  }}
-                />
-
-                {/* Delete (Confirmation Dialog) */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="flex items-center gap-1 bg-red-600 hover:bg-red-700"
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-none border-2 border-emerald-950 hover:bg-red-50 text-red-600"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-none border-4 border-emerald-950">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-black uppercase tracking-tighter text-2xl">
+                      Confirm Deletion
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="font-medium italic">
+                      This feedback transmission will be permanently removed.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-none font-bold uppercase tracking-widest">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(review._id)}
+                      disabled={isPending}
+                      className="rounded-none bg-red-600 text-white font-black uppercase tracking-widest border-2 border-emerald-950"
                     >
-                      <Trash2 size={16} /> Delete
-                    </Button>
-                  </AlertDialogTrigger>
+                      {isPending ? "Erasing..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
 
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-xl">
-                        Confirm Deletion
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this review? This action
-                        cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
+          {/* Comment Block */}
+          <div className="relative mb-6">
+            <Quote
+              className="absolute -top-2 -left-2 text-emerald-950/5"
+              size={40}
+            />
+            <p className="text-lg text-emerald-900/80 leading-relaxed font-medium italic relative z-10 pl-4 border-l-2 border-amber-400">
+              &quot;{review.comment}&quot;
+            </p>
+          </div>
 
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(review._id)}
-                        disabled={isPending}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        {isPending ? "Deleting..." : "Delete"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+          {/* Metadata Footer */}
+          <div className="mt-auto pt-6 border-t-2 border-emerald-950 border-dotted grid grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase text-emerald-950/40 tracking-widest">
+                Event Source
+              </span>
+              <div className="flex items-center gap-2 text-emerald-950 font-black uppercase text-xs truncate">
+                <Zap size={12} className="text-amber-500 shrink-0" />
+                <span className="truncate">{review.event.name}</span>
               </div>
             </div>
-
-            {/* COMMENT BODY */}
-            <div className="py-2">
-              <p className="text-gray-700 text-base italic leading-relaxed">
-                &quot;{review.comment}&quot;
-              </p>
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-black uppercase text-emerald-950/40 tracking-widest">
+                Mission Date
+              </span>
+              <div className="flex items-center gap-2 text-emerald-950 font-black uppercase text-xs">
+                <Calendar size={12} className="text-amber-500" />
+                <span>{formatDate(review.event.date)}</span>
+              </div>
             </div>
-
-            {/* FOOTER: Event Details/Metadata */}
-            <div className="mt-4 pt-4 border-t border-gray-100 text-sm text-gray-500 grid grid-cols-2 gap-2">
-              <p className="flex items-center font-medium">
-                <Zap size={14} className="text-indigo-500 mr-2" />
-                <span className="font-semibold text-gray-600">Event: </span>
-                <span className="ml-1 truncate" title={review.event.name}>
-                  {review.event.name}
-                </span>
-              </p>
-
-              <p className="flex items-center justify-end">
-                <Calendar size={14} className="text-indigo-500 mr-2" />
-                <span className="font-semibold text-gray-600">Date: </span>
-                <span className="ml-1">{formatDate(review.event.date)}</span>
-              </p>
-
-              <p className="col-span-2 text-xs text-right text-gray-400">
-                Reviewed on: {formatDate(review.createdAt)}
-              </p>
+            <div className="col-span-2 text-[9px] font-bold text-emerald-950/30 uppercase tracking-[0.2em] text-center pt-2">
+              Feedback Logged: {formatDate(review.createdAt)}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );
