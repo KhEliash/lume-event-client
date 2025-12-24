@@ -5,7 +5,7 @@ import Head from "next/head";
 import {
   Plus,
   Minus,
-  //   HelpCircle,
+    HelpCircle,
   MessageCircle,
   ArrowUpRight,
 } from "lucide-react";
@@ -135,7 +135,7 @@ export default function FAQPage() {
               </Link>
             </div>
 
-            {/* <div className="border-2 border-emerald-950 p-10 flex flex-col justify-between hover:bg-emerald-50 transition-colors">
+            <div className="border-2 border-emerald-950 p-10 flex flex-col justify-between hover:bg-emerald-50 transition-colors">
               <div>
                 <HelpCircle className="text-emerald-950 mb-6 w-10 h-10" />
                 <h3 className="text-2xl font-black uppercase tracking-tight mb-4 text-emerald-950">
@@ -145,12 +145,12 @@ export default function FAQPage() {
                   Learn about our community guidelines and security protocols.
                 </p>
               </div>
-              <Link href={"/faq"}>
+              <Link href={"/policy"}>
                 <button className="mt-8 text-emerald-950 font-black uppercase tracking-widest text-xs border-b-2 border-amber-400 w-fit pb-1 hover:text-amber-600 transition-colors">
                   View Guidelines
                 </button>
               </Link>
-            </div> */}
+            </div>
           </div>
         </div>
       </main>

@@ -85,7 +85,7 @@ export default function Contact() {
                   <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">
                     Email Support
                   </p>
-                  <p className="text-lg font-bold">concierge@lume.com</p>
+                  <p className="text-lg font-bold">eliashebrahim@gmail.com</p>
                 </div>
               </div>
 
@@ -97,7 +97,7 @@ export default function Contact() {
                   <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">
                     Phone
                   </p>
-                  <p className="text-lg font-bold">+1 (555) 000-8888</p>
+                  <p className="text-lg font-bold">+8801637160967</p>
                 </div>
               </div>
 
