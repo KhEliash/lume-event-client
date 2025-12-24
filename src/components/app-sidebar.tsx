@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import SidebarClient from "./SidebarClient";
 import { CalendarDays } from "lucide-react";
+import Link from "next/link";
 
 const menuItems = {
   user: [
@@ -40,9 +41,9 @@ const menuItems = {
     { title: "Back to Home", url: "/", icon: "ArrowLeft" },
   ],
   admin: [
-    { title: "Command Center", url: "/admin/dashboard", icon: "ShieldAlert" },
+    { title: "Analytics", url: "/admin/dashboard", icon: "ShieldAlert" },
     { title: "User Control", url: "/admin/dashboard/allusers", icon: "Users2" },
-    { title: "Platform Logs", url: "/admin/dashboard/logs", icon: "Database" },
+    // { title: "Platform Logs", url: "/admin/dashboard/logs", icon: "Database" },
     { title: "My Profile", url: "/profile", icon: "User" },
     { title: "Back to Home", url: "/", icon: "ArrowLeft" },
   ],
@@ -66,7 +67,7 @@ export default async function AppSidebar() {
   return (
     <Sidebar className="border-r-4 border-emerald-950 bg-white">
       <SidebarHeader className="p-6 border-b-2 border-emerald-950">
-        <div className="flex items-center gap-3">
+        <Link href={"/"} className="flex items-center gap-3">
           <div className="bg-emerald-950 p-2 text-amber-400">
             <CalendarDays size={20} />
           </div>
@@ -78,7 +79,7 @@ export default async function AppSidebar() {
               {role} Panel
             </span>
           </div>
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="p-4 bg-white">

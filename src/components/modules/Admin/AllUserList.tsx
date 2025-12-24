@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { activateUser, deactivateUser } from "@/services/admin/user-management";
@@ -13,217 +13,150 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  ArrowUpDown,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 const AllUserList = ({ initialData }: any) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const usersData = initialData?.data || [];
+  const [users, setUsers] = useState(initialData?.data || []);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+
   const meta = initialData?.meta || {
     page: 1,
     limit: 10,
     total: 0,
-    totalPages: 0,
+    totalPages: 1,
   };
-
-  const [users, setUsers] = useState(usersData);
-  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const currentPage = meta.page;
 
-  // === 1. HELPER FUNCTIONS (Completed) ===
-
-  const getStatusBadge = (isActive: boolean) => {
-    return isActive ? (
-      <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-        Active
-      </Badge>
-    ) : (
-      <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
-        Inactive
-      </Badge>
-    );
-  };
-
-  const getRoleBadge = (role: string) => {
-    switch (role?.toLowerCase()) {
-      case "admin":
-        return (
-          <Badge className="bg-purple-600 text-white hover:bg-purple-700">
-            Admin
-          </Badge>
-        );
-      case "host":
-        return (
-          <Badge className="bg-orange-500 text-white hover:bg-orange-600">
-            Host
-          </Badge>
-        );
-      default:
-        return <Badge variant="secondary">User</Badge>;
-    }
-  };
-
-  // === 2. PAGINATION HANDLER (Completed) ===
+  useEffect(() => {
+    setUsers(initialData?.data || []);
+  }, [initialData]);
 
   const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= meta.totalPages) {
-      const current = new URLSearchParams(searchParams.toString());
-      current.set("page", newPage.toString());
+    if (newPage < 1 || newPage > meta.totalPages) return;
 
-      router.push(`?${current.toString()}`);
-    }
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+
+    router.push(`?${params.toString()}`);
   };
-
-  // === 3. ACTIVATE/DEACTIVATE HANDLER (Confirmed and Cleaned) ===
 
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
     setLoadingUserId(userId);
-    const action = currentStatus ? "deactivate" : "activate";
-    toast.loading(`Attempting to ${action} user...`, { id: userId });
+    const action = currentStatus ? "REVOKE" : "AUTHORIZE";
+    toast.loading(`Processing...`, { id: userId });
 
     try {
-      let result;
-
-      if (currentStatus) {
-        result = await deactivateUser(userId);
-      } else {
-        result = await activateUser(userId);
-      }
-
+      const result = currentStatus
+        ? await deactivateUser(userId)
+        : await activateUser(userId);
       if (result.success) {
-        // Update local state immediately on success
-        setUsers((prevUsers: any[]) =>
-          prevUsers.map((user: any) =>
-            user._id === userId ? { ...user, isActive: !currentStatus } : user
+        setUsers((prev: any[]) =>
+          prev.map((u: any) =>
+            u._id === userId ? { ...u, isActive: !currentStatus } : u
           )
         );
-
-        toast.success(`User successfully ${action}d.`, { id: userId });
-      } else {
-        // Throw the error message returned by the server action
-        throw new Error(result.message || "API call failed.");
+        toast.success(`IDENTITY ${action}D`, { id: userId });
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred.";
-      toast.error(`Failed to ${action} user: ${errorMessage}`, { id: userId });
-      console.error(error);
+      toast.error("COMMUNICATION ERROR", { id: userId });
     } finally {
       setLoadingUserId(null);
     }
   };
-  // ===================================
 
   return (
-    <div className="p-4 md:p-8     mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">
-          👥 All Users ({meta.total})
-        </h1>
-        {/* <Input
-          placeholder="Search by name or email..."
-          className="w-[300px] border-gray-300"
-          // Add onChange handler here to update router query for search
-        /> */}
-      </div>
-
-      <div className="border rounded-lg overflow-hidden">
+    <div className="space-y-6">
+      <div className="border-4 border-emerald-950 bg-white shadow-[10px_10px_0px_0px_rgba(6,78,59,1)] overflow-hidden">
         <Table>
-          <TableHeader className="bg-gray-50">
-            <TableRow>
-              <TableHead className="w-[50px] font-bold text-gray-700">
+          <TableHeader className="bg-emerald-950">
+            <TableRow className="hover:bg-emerald-950 border-none">
+              <TableHead className="w-[60px] font-black text-amber-400 uppercase text-[10px]">
                 #
               </TableHead>
-              <TableHead className="font-bold text-gray-700">Name</TableHead>
-              <TableHead className="font-bold text-gray-700">Email</TableHead>
-              <TableHead className="font-bold text-gray-700">Role</TableHead>
-              <TableHead className="font-bold text-gray-700">
-                <Button
-                  variant="ghost"
-                  className="p-0 h-auto"
-                  // onClick={() => handleSort('status')}
-                >
-                  Status
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
+              <TableHead className="font-black text-amber-400 uppercase text-[10px]">
+                Identity
               </TableHead>
-              <TableHead className="font-bold text-gray-700">
-                Location
+              <TableHead className="font-black text-amber-400 uppercase text-[10px]">
+                Registry Role
               </TableHead>
-              <TableHead className="text-right font-bold text-gray-700">
-                Actions
+              <TableHead className="font-black text-amber-400 uppercase text-[10px]">
+                Status
+              </TableHead>
+              <TableHead className="text-right font-black text-amber-400 uppercase text-[10px]">
+                Ops
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.map((user: any, index: number) => {
               const serial = (currentPage - 1) * meta.limit + index + 1;
-              const isActionLoading = loadingUserId === user._id;
-              const userIsActive =
-                user.isActive !== undefined ? user.isActive : true;
+              const userIsActive = user.isActive ?? true;
 
               return (
                 <TableRow
                   key={user._id}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="border-b-2 border-emerald-950/10 hover:bg-emerald-50/50"
                 >
-                  <TableCell className="font-medium text-gray-600">
-                    {serial}
+                  <TableCell className="font-black text-emerald-950/30 text-xs">
+                    {serial.toString().padStart(2, "0")}
                   </TableCell>
-                  <TableCell className="font-semibold text-gray-800">
+                  <TableCell className="font-black text-emerald-950 uppercase tracking-tighter">
                     {user.fullName}
+                    <div className="text-[9px] text-emerald-950/40 lowercase tracking-normal font-bold">
+                      {user.email}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-sm text-blue-600">
-                    {user.email}
+                  <TableCell>
+                    <span className="px-2 py-0.5 border border-emerald-950 text-[9px] font-black uppercase bg-emerald-50">
+                      {user.role}
+                    </span>
                   </TableCell>
-                  <TableCell>{getRoleBadge(user.role)}</TableCell>
-                  <TableCell>{getStatusBadge(userIsActive)}</TableCell>
-                  <TableCell className="text-sm text-gray-600">
-                    {user.location?.city || "N/A"}
+                  <TableCell>
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        userIsActive
+                          ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                          : "bg-red-500"
+                      }`}
+                    />
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="h-8 w-8 p-0"
-                          disabled={isActionLoading}
+                          size="sm"
+                          className="rounded-none border-2 border-transparent hover:border-emerald-950"
                         >
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
+                          <MoreHorizontal size={14} />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent
+                        align="end"
+                        className="rounded-none border-2 border-emerald-950 bg-white shadow-[4px_4px_0px_0px_rgba(6,78,59,1)]"
+                      >
                         <DropdownMenuItem
                           onClick={() =>
                             handleToggleStatus(user._id, userIsActive)
                           }
-                          disabled={isActionLoading}
-                          className={
-                            userIsActive
-                              ? "text-red-600 hover:bg-red-50!"
-                              : "text-green-600 hover:bg-green-50!"
-                          }
+                          className={`font-black uppercase text-[10px] tracking-widest cursor-pointer ${
+                            userIsActive ? "text-red-600" : "text-emerald-600"
+                          }`}
                         >
-                          {userIsActive ? "Deactivate User" : "Activate User"}
+                          {userIsActive ? "Revoke Access" : "Grant Access"}
                         </DropdownMenuItem>
-                        {/* <DropdownMenuItem onClick={() => toast.info(`Viewing details for ${user.fullName}`)}>
-                                                    View Details
-                                                </DropdownMenuItem> */}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -234,42 +167,50 @@ const AllUserList = ({ initialData }: any) => {
         </Table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-6 p-4 bg-gray-50 rounded-lg shadow-inner">
-        <p className="text-sm text-gray-600">
-          Showing {users.length} of {meta.total} users.
-        </p>
+      {/* ===== PAGINATION CONTROLS ===== */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-emerald-950 p-4 border-2 border-emerald-950 shadow-[6px_6px_0px_0px_rgba(251,191,36,1)]">
+        <div className="text-[10px] font-black uppercase text-amber-400 tracking-widest">
+          Entry {(currentPage - 1) * meta.limit + 1} —{" "}
+          {Math.min(currentPage * meta.limit, meta.total)} of {meta.total}
+        </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1">
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            className="rounded-none text-white hover:bg-amber-400 hover:text-emerald-950 disabled:opacity-20"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage <= 1}
           >
-            <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+            <ChevronLeft size={18} />
           </Button>
 
-          <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {meta.totalPages}
-          </span>
+          {/* Simple Page Indicator Loop */}
+          {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(
+            (pageNum) => (
+              <Button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={`w-8 h-8 rounded-none border-2 font-black text-xs ${
+                  currentPage === pageNum
+                    ? "bg-amber-400 border-amber-400 text-emerald-950"
+                    : "bg-transparent border-white/20 text-white hover:border-amber-400"
+                }`}
+              >
+                {pageNum}
+              </Button>
+            )
+          )}
 
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            className="rounded-none text-white hover:bg-amber-400 hover:text-emerald-950 disabled:opacity-20"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage >= meta.totalPages}
           >
-            Next <ChevronRight className="h-4 w-4 ml-1" />
+            <ChevronRight size={18} />
           </Button>
         </div>
       </div>
-
-      {users.length === 0 && (
-        <div className="text-center py-10 text-gray-500">
-          No users found matching the current filters.
-        </div>
-      )}
     </div>
   );
 };

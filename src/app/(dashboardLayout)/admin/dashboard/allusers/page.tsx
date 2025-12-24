@@ -1,42 +1,6 @@
-// import AllUserList from '@/components/modules/Admin/AllUserList';
-// import { getAllUsers } from '@/services/admin/user-management';
-// import { redirect } from 'next/navigation';
-
-// export default async function AdminUsersPage({ searchParams }: { searchParams: { page?: string, limit?: string, role?: string } }) {
-    
-//     // Extract search parameters for dynamic fetching
-//     const page = parseInt(searchParams.page || '1');
-//     const limit = parseInt(searchParams.limit || '10');
-//     const role = searchParams.role || 'user'; // Default role, adjust as needed
-
-//     const result = await getAllUsers(page, limit, role);
-
-//     if (!result.success) {
-//         // Handle authentication or major failure, e.g., redirect to login
-//         if (result.message.includes("Authentication token missing")) {
-//             redirect('/login'); 
-//         }
-//         // Fallback for other errors
-//         return <div>Error loading users: {result.message}</div>;
-//     }
-
-//     // The component expects the data structure from your original API response
-//     const formattedData = {
-//         data: result.users.data || [],
-//         meta: result.users.meta,
-//         message: result.users.message,
-//         statusCode: result.users.statusCode,
-//         success: result.users.success,
-//     };
-
-//     return (
-//         <AllUserList initialData={formattedData} />
-//     );
-// }
-
-import AllUserList from '@/components/modules/Admin/AllUserList';
-import { getAllUsers } from '@/services/admin/user-management';
-import { redirect } from 'next/navigation';
+import AllUserList from "@/components/modules/Admin/AllUserList";
+import { getAllUsers } from "@/services/admin/user-management";
+import { redirect } from "next/navigation";
 
 type PageProps = {
   searchParams: Promise<{
@@ -47,29 +11,40 @@ type PageProps = {
 };
 
 export default async function AdminUsersPage({ searchParams }: PageProps) {
-  // ✅ unwrap async searchParams
   const params = await searchParams;
-
-  const page = parseInt(params.page || '1', 20);
-  const limit = parseInt(params.limit || '10', 20);
-  const role = params.role ?? 'user';
+  const page = parseInt(params.page || "1", 10);
+  const limit = parseInt(params.limit || "10", 10);
+  const role = params.role ?? "user";
 
   const result = await getAllUsers(page, limit, role);
-
+  console.log(result);
   if (!result.success) {
-    if (result.message?.includes('Authentication token missing')) {
-      redirect('/login');
+    if (result.message?.includes("Authentication token missing")) {
+      redirect("/login");
     }
-    return <div>Error loading users: {result.message}</div>;
+    return (
+      <div className="p-10 font-black text-red-600 uppercase border-4 border-red-600 bg-red-50">
+        Error: {result.message}
+      </div>
+    );
   }
 
-  const formattedData = {
-    data: result.users.data || [],
-    meta: result.users.meta,
-    message: result.users.message,
-    statusCode: result.users.statusCode,
-    success: result.users.success,
-  };
+  const formattedData = result.users;
 
-  return <AllUserList initialData={formattedData} />;
+  return (
+    <div className="space-y-8 px-4 md:px-10 py-6">
+      <div className="border-b-4 border-emerald-950 pb-6">
+        <h1 className="text-5xl font-black text-emerald-950 uppercase tracking-tighter">
+          User Registry
+        </h1>
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-amber-600 font-bold text-xs uppercase tracking-[0.2em]">
+            Authorized Personnel: {formattedData.meta.total} entries
+          </p>
+        </div>
+      </div>
+
+      <AllUserList initialData={formattedData} />
+    </div>
+  );
 }

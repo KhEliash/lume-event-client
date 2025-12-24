@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { myHostedEvents } from "@/services/host/event-actions";
 import Link from "next/link";
 import {
@@ -8,221 +9,175 @@ import {
   DollarSign,
   Edit,
   Eye,
-   
   Tag,
-  Activity,
   AlertTriangle,
   ZapIcon,
+  Plus,
 } from "lucide-react";
 import Image from "next/image";
 import { DeleteEventButton } from "./DeleteEventButton";
 
 const getStatusBadgeClasses = (status: string): string => {
   const base =
-    "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-md";
+    "absolute -top-1 -right-1 px-4 py-1 rounded-none text-[10px] font-black uppercase tracking-tighter border-2 border-emerald-950 shadow-[2px_2px_0px_0px_rgba(6,78,59,1)] z-10";
   switch (status.toLowerCase()) {
     case "open":
-      return `${base} bg-green-600 text-white`;
+      return `${base} bg-emerald-400 text-emerald-950`;
     case "full":
-      return `${base} bg-yellow-500 text-black`;
+      return `${base} bg-amber-400 text-emerald-950`;
     case "cancelled":
-      return `${base} bg-red-600 text-white`;
+      return `${base} bg-red-400 text-white`;
     case "closed":
-      return `${base} bg-gray-500 text-white`;
+      return `${base} bg-slate-400 text-white`;
     default:
-      return `${base} bg-blue-600 text-white`;
+      return `${base} bg-blue-400 text-white`;
   }
 };
 
-const formatCurrency = (amount: number): string => {
-  return amount === 0 ? "Free" : `$${amount}`;
-};
-
-interface Location {
-  address: string;
-  city: string;
-}
-
-interface EventData {
-  _id: string;
-  name: string;
-  description: string;
-  eventImage?: string;
-  date: string;
-  time: string;
-  status: string;
-  type: string;
-  joiningFee: number;
-  currentParticipants: number;
-  maxParticipants: number;
-  location: Location;
-  isActive?: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// interface HostedEventsResult {
-//   success: boolean;
-//   message: string;
-//   events: {
-//     data: EventData[];
-//   };
-// }
-
 const MyHostedEvents = async () => {
-  const result = (await myHostedEvents()) ;
-
+  const result = await myHostedEvents();
   const { success, message, events } = result;
   const eventList = events?.data || [];
-  // console.log(eventList);
 
   if (!success) {
     return (
-      <div className="text-center text-red-700 bg-red-50 border border-red-300 font-semibold p-6 rounded-lg shadow-inner">
-        <AlertTriangle className="w-6 h-6 inline mr-2" />
-        Error Fetching Events: {message}
+      <div className="border-4 border-emerald-950 bg-red-50 p-8 shadow-[8px_8px_0px_0px_rgba(220,38,38,1)] flex items-center gap-4">
+        <AlertTriangle className="w-10 h-10 text-red-600" />
+        <div>
+          <h2 className="font-black uppercase text-red-600">System Error</h2>
+          <p className="font-bold text-sm text-red-900">{message}</p>
+        </div>
       </div>
     );
   }
 
   if (eventList.length === 0) {
     return (
-      <div className="text-center text-gray-500 font-medium p-8 border-dashed border-2 border-gray-300 rounded-lg bg-gray-50">
-        <h1 className="text-2xl mb-2">No Hosted Events Found</h1>
-        You have not hosted any events yet.{" "}
-        <Link href="/host/dashboard/create-event" className="text-blue-600 hover:underline">
-          Create one now!
+      <div className="border-4 border-dashed border-emerald-950 p-12 text-center bg-white shadow-[8px_8px_0px_0px_rgba(6,78,59,1)]">
+        <h2 className="text-2xl font-black uppercase text-emerald-950 mb-4 font-mono italic">
+          No Intel Found
+        </h2>
+        <Link
+          href="/host/dashboard/create-event"
+          className="inline-flex items-center gap-2 bg-amber-400 px-6 py-3 border-2 border-emerald-950 font-black uppercase text-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0px_0px_rgba(6,78,59,1)]"
+        >
+          <Plus size={18} /> Launch First Event
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-8 border-b pb-2 flex items-center">
-        <Activity className="w-6 h-6 text-blue-600 mr-2" />
-        My Hosted Events
-      </h1>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+      {eventList.map((event: any) => (
+        <div
+          key={event._id}
+          className="group relative bg-white border-4 border-emerald-950 shadow-[8px_8px_0px_0px_rgba(6,78,59,1)] transition-all hover:shadow-[12px_12px_0px_0px_rgba(251,191,36,1)] hover:-translate-x-1 hover:-translate-y-1 flex flex-col"
+        >
+          {/* Status & Image Header */}
+          <div className="relative h-56 w-full border-b-4 border-emerald-950 bg-emerald-50 overflow-hidden">
+            <span className={getStatusBadgeClasses(event.status)}>
+              {event.status}
+            </span>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {eventList.map((event: EventData) => (
-          <div
-            key={event._id}
-            className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl hover:border-blue-300"
-          >
-             <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
-               {event.eventImage ? (
-                <Image
-                  src={event.eventImage}
-                  alt={event.name}
-                  fill={true}  
-                  className="object-cover"  
-                  sizes="(max-width: 768px) 100vw, 33vw"  
-                />
-              ) : (
-                <ZapIcon className="w-12 h-12 text-gray-400" />
-              )}
-
-              {/* Status Badge */}
-              <span className={getStatusBadgeClasses(event.status)}>
-                {event.status.toUpperCase()}
-              </span>
-
-              {/* Type Tag */}
-              <span className="absolute bottom-3 left-3 bg-black/70 text-white px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-                <Tag className="inline w-3 h-3 mr-1" />
-                {event.type.toUpperCase().replace(/_/g, " ")}
-              </span>
-            </div>
-
-            {/* Card Content */}
-            <div className="p-5 flex flex-col grow space-y-4">
-              {/* Title */}
-              <h3
-                className="text-2xl font-extrabold text-gray-900 line-clamp-2"
-                title={event.name}
-              >
-                {event.name}
-              </h3>
-
-              {/* Description */}
-              <p className="text-gray-600 text-sm line-clamp-3">
-                {event.description}
-              </p>
-
-              {/* Details Grid */}
-              <div className="space-y-2 text-sm text-gray-700 pt-3 border-t border-gray-100">
-                {/* Date & Time */}
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-2 text-indigo-500 shrink-0" />
-                  <span className="font-medium">
-                    {new Date(event.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-                  <Clock className="w-4 h-4 ml-4 mr-2 text-indigo-500 shrink-0" />
-                  <span className="font-medium">{event.time}</span>
-                </div>
-
-                {/* Location */}
-                <div
-                  className="flex items-center"
-                  title={`${event.location?.address}, ${event.location?.city}`}
-                >
-                  <MapPin className="w-4 h-4 mr-2 text-red-500 shrink-0" />
-                  <span className="truncate">
-                    {event.location?.city}, {event.location?.address}
-                  </span>
-                </div>
-
-                {/* Participants & Fee */}
-                <div className="flex justify-between pt-2">
-                  <div className="flex items-center text-gray-700">
-                    <Users className="w-4 h-4 mr-2 text-green-600 shrink-0" />
-                    <span className="font-semibold">
-                      {event.currentParticipants}/{event.maxParticipants}{" "}
-                      Participants
-                    </span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <DollarSign className="w-4 h-4 mr-2 text-purple-600 shrink-0" />
-                    <span className="font-bold text-blue-700">
-                      {formatCurrency(event.joiningFee)}
-                    </span>
-                  </div>
-                </div>
+            {event.eventImage ? (
+              <Image
+                src={event.eventImage}
+                alt={event.name}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-2 opacity-20">
+                <ZapIcon size={48} className="text-emerald-950" />
+                <span className="font-black text-xs uppercase italic">
+                  No Visual Data
+                </span>
               </div>
+            )}
 
-              {/* Actions */}
-              <div className="flex justify-between gap-3 pt-5 border-t border-gray-100 mt-auto">
-                <Link
-                  href={`/host/dashboard/event/${event._id}`}
-                  className="flex-1 flex items-center justify-center text-sm px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  <Eye className="w-4 h-4 mr-1" /> View
-                </Link>
-
-                <Link
-                  href={`/host/dashboard/event/update/${event._id}`}
-                  className="flex-1 flex items-center justify-center text-sm px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
-                >
-                  <Edit className="w-4 h-4 mr-1" /> Edit
-                </Link>
-
-                {/* <button
-                  className="flex-1 flex items-center justify-center text-sm px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
-                  // Add a client component wrapper or handler for deletion here
-                >
-                  <Trash2 className="w-4 h-4 mr-1" /> Delete
-                </button> */}
-                <DeleteEventButton eventId={event._id}/>
-              </div>
+            <div className="absolute bottom-0 left-0 bg-emerald-950 text-amber-400 px-4 py-1 font-black text-[10px] uppercase tracking-widest border-t-2 border-r-2 border-emerald-950">
+              <Tag className="inline w-3 h-3 mr-1" />
+              {event.type.replace(/_/g, " ")}
             </div>
           </div>
-        ))}
-      </div>
+
+          {/* Content Body */}
+          <div className="p-6 flex flex-col grow">
+            <h3 className="text-xl font-black uppercase leading-tight text-emerald-950 mb-3 italic line-clamp-2">
+              {event.name}
+            </h3>
+
+            <p className="text-emerald-900 font-medium text-xs leading-relaxed mb-6 line-clamp-2 italic opacity-80">
+              {event.description}
+            </p>
+
+            {/* Grid Stats */}
+            <div className="grid grid-cols-2 gap-px bg-emerald-950 border-2 border-emerald-950 mb-6">
+              <div className="bg-white p-3 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-amber-500" />
+                <span className="text-[10px] font-black uppercase text-emerald-950 truncate">
+                  {new Date(event.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="bg-white p-3 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-500" />
+                <span className="text-[10px] font-black uppercase text-emerald-950">
+                  {event.time}
+                </span>
+              </div>
+              <div className="bg-white p-3 flex items-center gap-2">
+                <Users className="w-4 h-4 text-amber-500" />
+                <span className="text-[10px] font-black uppercase text-emerald-950">
+                  {event.currentParticipants}/{event.maxParticipants}
+                </span>
+              </div>
+              <div className="bg-white p-3 flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-amber-500" />
+                <span className="text-[10px] font-black uppercase text-emerald-950">
+                  {event.joiningFee === 0 ? "FREE" : `$${event.joiningFee}`}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2 mb-8">
+              <MapPin className="w-4 h-4 text-emerald-950 shrink-0 mt-0.5" />
+              <span className="text-[10px] font-bold uppercase text-emerald-800 leading-tight">
+                {event.location?.city} <br />
+                <span className="opacity-60">{event.location?.address}</span>
+              </span>
+            </div>
+
+            {/* Action Bar */}
+            <div className="mt-auto grid grid-cols-3 gap-2">
+              <Link
+                href={`/host/dashboard/event/${event._id}`}
+                className="flex flex-col items-center justify-center p-2 border-2 border-emerald-950 bg-white hover:bg-emerald-50 transition-colors group/btn shadow-[2px_2px_0px_0px_rgba(6,78,59,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+              >
+                <Eye size={16} />
+                <span className="text-[8px] font-black uppercase mt-1">
+                  View
+                </span>
+              </Link>
+
+              <Link
+                href={`/host/dashboard/event/update/${event._id}`}
+                className="flex flex-col items-center justify-center p-2 border-2 border-emerald-950 bg-white hover:bg-amber-50 transition-colors shadow-[2px_2px_0px_0px_rgba(6,78,59,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+              >
+                <Edit size={16} />
+                <span className="text-[8px] font-black uppercase mt-1 text-emerald-950">
+                  Edit
+                </span>
+              </Link>
+
+              <DeleteEventButton eventId={event._id} />
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

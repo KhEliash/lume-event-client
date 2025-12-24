@@ -1,5 +1,5 @@
+/* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -22,12 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { DatePicker } from "@/components/ui/date-picker"; // Use the custom shadcn DatePicker
+import { DatePicker } from "@/components/ui/date-picker";
 import { EventFormValues, EventType } from "@/types/event-schema";
 import { useFormState } from "react-dom";
 import { createEventAction } from "@/services/host/event-actions";
 import { startTransition, useEffect } from "react";
 import { toast } from "sonner";
+import { MapPin, Calendar, Users, DollarSign, Upload } from "lucide-react";
 
 const eventTypes = Object.values(EventType);
 
@@ -53,7 +54,7 @@ export function CreateEventForm() {
       minParticipants: 1,
       maxParticipants: 10,
       joiningFee: 0,
-      image: undefined, // File | undefined
+      image: undefined,
     },
   });
 
@@ -80,7 +81,6 @@ export function CreateEventForm() {
 
   useEffect(() => {
     if (state.message) {
-      console.log(state.message);
       if (state.success) {
         form.reset();
         toast.success(state.message || "Created successfully");
@@ -90,236 +90,286 @@ export function CreateEventForm() {
     }
   }, [state, form]);
 
+  // Design Tokens
+  const boxStyle =
+    "border-2 border-emerald-950 rounded-none shadow-[4px_4px_0px_0px_rgba(6,78,59,1)]";
+  const inputStyle =
+    "rounded-none border-2 border-emerald-950 focus-visible:ring-0 focus-visible:border-amber-500 font-medium placeholder:text-emerald-900/30";
+  const labelStyle =
+    "text-xs font-black uppercase tracking-widest text-emerald-950 mb-2 block";
+
   return (
     <Form {...form}>
       <form
         onSubmit={handleRHFSubmit}
-        className="space-y-8 p-6 border rounded-xl shadow-lg  "
+        className=" space-y-10 p-4 md:p-8  bg-white border-4 border-emerald-950 shadow-[12px_12px_0px_0px_rgba(251,191,36,1)]"
       >
-        <h2 className="text-2xl font-bold">Create New Event</h2>
+        <header className="border-b-4 border-emerald-950 pb-6 mb-8">
+          <h2 className="text-4xl font-black uppercase tracking-tighter text-emerald-950 italic">
+            Create <span className="text-amber-500">New Event</span>
+          </h2>
+        </header>
 
-        {/* Event Name */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Event Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Tech Mixer 2025" {...field} required />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Left Column: Core Details */}
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={labelStyle}>
+                    Event Designation
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="TECH MIXER 2025"
+                      {...field}
+                      className={inputStyle}
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage className="text-[10px] font-bold uppercase italic" />
+                </FormItem>
+              )}
+            />
 
-        {/* Event Type */}
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Event Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl className="w-full cursor-pointer">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an event type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {eventTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type.charAt(0).toUpperCase() +
-                        type.slice(1).toLowerCase().replace(/_/g, " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={labelStyle}>Classification</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className={inputStyle}>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="rounded-none border-2 border-emerald-950">
+                      {eventTypes.map((type) => (
+                        <SelectItem
+                          key={type}
+                          value={type}
+                          className="uppercase font-bold text-xs focus:bg-amber-100"
+                        >
+                          {type.replace(/_/g, " ")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {/* Description */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Describe the event in detail..."
-                  {...field}
-                  required
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={labelStyle}>
+                    Mission Description
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="DETAILED EVENT INTEL..."
+                      className={`${inputStyle} min-h-[140px] resize-none`}
+                      {...field}
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Right Column: Logistics */}
+          <div className="space-y-6">
+            {/* Schedule Section */}
+            <div className={`p-4 bg-emerald-50 ${boxStyle}`}>
+              <div className="flex items-center gap-2 mb-4 border-b-2 border-emerald-950 pb-2">
+                <Calendar className="w-4 h-4 text-emerald-950" />
+                <span className="text-xs font-black uppercase tracking-widest">
+                  Schedule
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-[10px] font-bold uppercase opacity-60">
+                        Date
+                      </FormLabel>
+                      <DatePicker field={field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-bold uppercase opacity-60">
+                        Time
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} className={inputStyle} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-        {/* Date and Time (Grouped) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
-                <DatePicker field={field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Time */}
-          <FormField
-            control={form.control}
-            name="time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Time</FormLabel>
-                <FormControl>
-                  <Input type="time" placeholder="HH:MM" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Location Section */}
+            <div className={`p-4 bg-amber-50 ${boxStyle}`}>
+              <div className="flex items-center gap-2 mb-4 border-b-2 border-emerald-950 pb-2">
+                <MapPin className="w-4 h-4 text-emerald-950" />
+                <span className="text-xs font-black uppercase tracking-widest">
+                  Coordinates
+                </span>
+              </div>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="STREET ADDRESS"
+                          {...field}
+                          className={inputStyle}
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="CITY"
+                          {...field}
+                          className={inputStyle}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Location (Grouped - Using flattened keys 'address' and 'city') */}
-        <fieldset className="border p-4 rounded-md space-y-4">
-          <legend className="text-lg font-semibold px-2">
-            Location (Flattened)
-          </legend>
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="123 Main St (address)"
-                    {...field}
-                    required
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>City</FormLabel>
-                <FormControl>
-                  <Input placeholder="San Francisco (city)" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </fieldset>
-
-        {/* Participants & Fee (Grouped) */}
-        <div className="grid grid-cols-3 gap-4">
-          {/* Min Participants */}
+        {/* Bottom Row: Metrics & Assets */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end pt-6 border-t-4 border-emerald-950">
           <FormField
             control={form.control}
             name="minParticipants"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Min</FormLabel>
+                <FormLabel className={labelStyle}>Min Pax</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    min="1"
                     {...field}
+                    className={inputStyle}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* Max Participants */}
           <FormField
             control={form.control}
             name="maxParticipants"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Max</FormLabel>
+                <FormLabel className={labelStyle}>Max Pax</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    min="1"
                     {...field}
+                    className={inputStyle}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* Joining Fee */}
           <FormField
             control={form.control}
             name="joiningFee"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fee ($)</FormLabel>
+                <FormLabel className={labelStyle}>Entry Fee ($)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     step="0.01"
-                    min="0"
-                    placeholder="0.00"
                     {...field}
+                    className={inputStyle}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
-                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field: { value, onChange, ...fieldProps } }) => (
+              <FormItem className="relative">
+                <FormLabel className={labelStyle}>Visual Identity</FormLabel>
+                <FormControl>
+                  <div className="relative group">
+                    <Input
+                      {...fieldProps}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      id="file-upload"
+                      onChange={(e) =>
+                        onChange(e.target.files && e.target.files[0])
+                      }
+                    />
+                    <label
+                      htmlFor="file-upload"
+                      className={`flex items-center justify-center h-10 w-full cursor-pointer bg-emerald-950 text-white hover:bg-amber-500 transition-colors uppercase font-black text-[10px] tracking-tighter ${boxStyle}`}
+                    >
+                      <Upload className="w-3 h-3 mr-2" />
+                      {form.watch("image") ? "Change File" : "Upload File"}
+                    </label>
+                  </div>
+                </FormControl>
               </FormItem>
             )}
           />
         </div>
 
-        {/* Event Image (File Input - Key 'image') */}
-        <FormField
-          control={form.control}
-          name="image"
-          render={({ field: { value, onChange, ...fieldProps } }) => (
-            <FormItem>
-              <FormLabel>Event Image (Key: **image**)</FormLabel>
-              <FormControl>
-                <Input
-                  {...fieldProps}
-                  type="file"
-                  accept="image/*"
-                  // Only capture the first file selected
-                  onChange={(event) => {
-                    onChange(event.target.files && event.target.files[0]);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <Button
           type="submit"
-          className="w-full cursor-pointer"
           disabled={form.formState.isSubmitting}
+          className="w-full h-16 bg-emerald-950 hover:bg-amber-500 text-white hover:text-emerald-950 rounded-none border-b-8 border-r-8 border-emerald-700 active:border-0 active:translate-y-1 transition-all text-xl font-black uppercase tracking-[0.2em]"
         >
-          {pending ? "Creating..." : "Create Event"}
+          {pending ? "Transmitting..." : "Initialize Event"}
         </Button>
       </form>
     </Form>

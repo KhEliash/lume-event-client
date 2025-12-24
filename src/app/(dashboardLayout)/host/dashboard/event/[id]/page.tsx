@@ -10,16 +10,22 @@ import {
   Users,
   DollarSign,
   ChevronLeft,
-  Zap,
   Star,
   Activity,
   AlertTriangle,
+  Layers,
 } from "lucide-react";
 import { getEventReviews } from "@/services/review/review-actions";
-import { Separator } from "@/components/ui/separator";
 import { ReviewCard } from "@/components/modules/Host/ReviewCard";
 
-// --- UTILITY FUNCTIONS ---
+// --- BRUTALIST UI TOKENS ---
+const boxStyle =
+  "border-4 border-emerald-950 bg-white shadow-[8px_8px_0px_0px_rgba(6,78,59,1)]";
+const headerBox =
+  "border-4 border-emerald-950 shadow-[12px_12px_0px_0px_rgba(251,191,36,1)] bg-white overflow-hidden";
+const labelStyle =
+  "text-[10px] font-black uppercase tracking-widest text-emerald-900/60 mb-1 block";
+
 const formatDate = (isoDate: string): string => {
   return new Date(isoDate).toLocaleDateString("en-US", {
     month: "long",
@@ -29,19 +35,21 @@ const formatDate = (isoDate: string): string => {
 };
 
 const formatFee = (fee: number): string => {
-  return fee === 0 ? "Free" : `$${fee}`;
+  return fee === 0 ? "FREE OF CHARGE" : `$${fee}`;
 };
 
 const getStatusClasses = (status: string): string => {
+  const base =
+    "px-4 py-1 text-xs font-black uppercase border-2 border-emerald-950 italic";
   switch (status.toLowerCase()) {
     case "open":
-      return "bg-green-100 text-green-700 border-green-300";
+      return `${base} bg-emerald-400 text-emerald-950`;
     case "full":
-      return "bg-yellow-100 text-yellow-700 border-yellow-300";
+      return `${base} bg-amber-400 text-emerald-950`;
     case "closed":
-      return "bg-gray-100 text-gray-700 border-gray-300";
+      return `${base} bg-slate-300 text-slate-700`;
     default:
-      return "bg-red-100 text-red-700 border-red-300";
+      return `${base} bg-red-400 text-white`;
   }
 };
 
@@ -53,230 +61,242 @@ export default async function EventDetailsPage({
   const { id } = await params;
   const resultEvent = await eventById(id);
   const eventReviews = await getEventReviews(id);
- 
+
   if (!resultEvent) {
     return (
-      <div className="text-red-500 p-10 text-center font-semibold border-2 border-red-300 rounded-xl bg-red-50">
-        <AlertTriangle className="w-5 h-5 inline mr-2" /> Error:{" "}
-        {"Event not found."}
+      <div className="max-w-xl mx-auto mt-20 p-8 border-4 border-emerald-950 bg-red-50 shadow-[8px_8px_0px_0px_rgba(220,38,38,1)] flex items-center gap-4">
+        <AlertTriangle className="w-10 h-10 text-red-600" />
+        <h2 className="text-xl font-black uppercase text-red-600 italic">
+          Critical Error: Event Not Found
+        </h2>
       </div>
     );
   }
 
   const events = resultEvent.data;
-console.log(events);
+
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="  px-4 md:px-10 py-6  space-y-12 ">
       {/* Back Button */}
       <Link
         href="/host/dashboard"
-        className="inline-flex items-center text-blue-600 hover:text-blue-800 transition"
+        className="inline-flex items-center group font-black uppercase text-xs tracking-widest text-emerald-950"
       >
-        <ChevronLeft className="w-5 h-5 mr-1" />
-        Back to Dashboard
+        <div className="bg-emerald-950 text-white p-1 mr-3 group-hover:bg-amber-500 transition-colors">
+          <ChevronLeft className="w-4 h-4" />
+        </div>
+        Return to Control Center
       </Link>
 
-      {/* --- Section 1: Banner and Title Block --- */}
-      <div className="relative w-full h-80 rounded-2xl overflow-hidden shadow-2xl bg-gray-200">
-        {events.eventImage ? (
-          <Image
-            src={events.eventImage}
-            alt={events.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 900px"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-500 text-lg">
-            No Image Available
+      {/* --- Section 1: Hero Block --- */}
+      <div className={headerBox}>
+        <div className="flex flex-col lg:flex-row h-full lg:h-[450px]">
+          <div className="lg:w-3/5 relative h-64 lg:h-full border-b-4 lg:border-b-0 lg:border-r-4 border-emerald-950 bg-emerald-50">
+            {events.eventImage ? (
+              <Image
+                src={events.eventImage}
+                alt={events.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 800px"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-emerald-900/20 italic">
+                <Layers size={64} />
+                <p className="font-black uppercase text-sm mt-4">
+                  No Asset Found
+                </p>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Title and Badges Overlay */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
-          <h1 className="text-4xl font-extrabold text-white mb-2">
-            {events.name}
-          </h1>
-          <div className="flex flex-wrap items-center gap-3">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusClasses(
-                events.status
-              )}`}
-            >
-              {events.status.toUpperCase()}
-            </span>
-            <span className="bg-blue-600/90 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center">
-              <Activity className="w-3 h-3 mr-1" />
-              {events.type.toUpperCase().replace(/_/g, " ")}
-            </span>
+          <div className="lg:w-2/5 p-8 flex flex-col justify-center bg-white">
+            <div className="flex flex-wrap gap-2 mb-6">
+              <span className={getStatusClasses(events.status)}>
+                {events.status}
+              </span>
+              <span className="px-4 py-1 text-xs font-black uppercase border-2 border-emerald-950 bg-amber-100 text-emerald-950 flex items-center">
+                <Activity className="w-3 h-3 mr-2" />
+                {events.type.replace(/_/g, " ")}
+              </span>
+            </div>
+
+            <h1 className="text-5xl font-black uppercase tracking-tighter text-emerald-950 leading-[0.9] italic mb-6">
+              {events.name}
+            </h1>
+
+            <div className="flex items-center gap-4 p-4 border-2 border-emerald-950 bg-emerald-50 italic font-bold text-emerald-900">
+              <MapPin className="text-amber-500 shrink-0" />
+              <span>
+                {events.location.address}, {events.location.city}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* --- Section 2: Main Content (Details, Host, Description) --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column (Main Description and Key Details) - 2/3 width */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Description */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h2 className="text-2xl font-bold mb-3 text-gray-800 border-b pb-2">
-              Event Description
+      {/* --- Section 2: Main Content --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Side: Intel & Description (8 Columns) */}
+        <div className="lg:col-span-8 space-y-10">
+          <div className={boxStyle + " p-8"}>
+            <h2 className="text-2xl font-black uppercase italic text-emerald-950 mb-6 border-b-4 border-amber-400 inline-block">
+              Intel Description
             </h2>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <p className="text-emerald-900 font-medium leading-relaxed whitespace-pre-wrap first-letter:text-5xl first-letter:font-black first-letter:mr-3 first-letter:float-left first-letter:text-amber-500">
               {events.description}
             </p>
           </div>
 
-          {/* Key Details Card */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">
-              Key Information
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 text-sm">
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-5 h-5 text-indigo-500" />
-                <div>
-                  <p className="text-xs text-gray-500">Date</p>
-                  <p className="font-semibold text-gray-800">
-                    {formatDate(events.date)}
-                  </p>
-                </div>
+          {/* Logistics Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div
+              className={
+                boxStyle + " p-6 flex gap-4 items-center bg-emerald-50"
+              }
+            >
+              <div className="bg-emerald-950 p-3 text-white">
+                <Calendar className="w-6 h-6" />
               </div>
-
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-indigo-500" />
-                <div>
-                  <p className="text-xs text-gray-500">Time</p>
-                  <p className="font-semibold text-gray-800">{events.time}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <DollarSign className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="text-xs text-gray-500">Joining Fee</p>
-                  <p className="font-bold text-green-700">
-                    {formatFee(events.joiningFee)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Users className="w-5 h-5 text-yellow-600" />
-                <div>
-                  <p className="text-xs text-gray-500">Participants</p>
-                  <p className="font-semibold text-gray-800">
-                    {events.currentParticipants} / {events.maxParticipants}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-5 h-5 text-red-500" />
-                <div className="truncate">
-                  <p className="text-xs text-gray-500">Location</p>
-                  <p
-                    className="font-semibold text-gray-800 truncate"
-                    title={`${events.location.address}, ${events.location.city}`}
-                  >
-                    {events.location.city}
-                  </p>
-                </div>
+              <div>
+                <span className={labelStyle}>Date</span>
+                <p className="font-black text-emerald-950 uppercase italic">
+                  {formatDate(events.date)}
+                </p>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h2 className="text-xl font-bold mb-3 text-gray-800 border-b pb-2">
-              Capacity & Requirements
-            </h2>
-            <div className="flex gap-6">
-              <p className="text-gray-700 flex items-center">
-                <Users className="w-4 h-4 mr-2 text-blue-500" />
-                <span className="font-semibold">Min Participants:</span>{" "}
-                {events.minParticipants}
-              </p>
-              <p className="text-gray-700 flex items-center">
-                <Zap className="w-4 h-4 mr-2 text-blue-500" />
-                <span className="font-semibold">Event Status:</span>
-                <span
-                  className={`ml-1 ${
-                    events.isActive ? "text-green-600" : "text-red-600"
-                  } font-bold`}
-                >
-                  {events.isActive ? "Active" : "Inactive"}
-                </span>
-              </p>
+            <div
+              className={
+                boxStyle + " p-6 flex gap-4 items-center bg-emerald-50"
+              }
+            >
+              <div className="bg-emerald-950 p-3 text-white">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div>
+                <span className={labelStyle}>Deployment</span>
+                <p className="font-black text-emerald-950 uppercase italic">
+                  {events.time}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={boxStyle + " p-6 flex gap-4 items-center bg-amber-50"}
+            >
+              <div className="bg-amber-500 p-3 text-emerald-950 border-2 border-emerald-950">
+                <DollarSign className="w-6 h-6" />
+              </div>
+              <div>
+                <span className={labelStyle}>Access Fee</span>
+                <p className="font-black text-emerald-950 uppercase italic">
+                  {formatFee(events.joiningFee)}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={boxStyle + " p-6 flex gap-4 items-center bg-amber-50"}
+            >
+              <div className="bg-amber-500 p-3 text-emerald-950 border-2 border-emerald-950">
+                <Users className="w-6 h-6" />
+              </div>
+              <div>
+                <span className={labelStyle}>Manifest</span>
+                <p className="font-black text-emerald-950 uppercase italic">
+                  {events.currentParticipants} / {events.maxParticipants}{" "}
+                  <span className="text-[10px] opacity-50">PAX</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-1 space-y-8">
+        {/* Right Side: Host & Management (4 Columns) */}
+        <div className="lg:col-span-4 space-y-8">
           {/* Host Card */}
-          <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100 sticky top-4">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">
-              Hosted By
-            </h2>
-
-            <div className="flex items-center space-x-4">
-              {events.host.profileImage ? (
-                <Image
-                  src={events.host.profileImage}
-                  alt={events.host.fullName}
-                  width={64}
-                  height={64}
-                  className="rounded-full object-cover border-2 border-blue-400"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl border-2 border-blue-400">
-                  {events.host.fullName[0]}
+          <div className={boxStyle + " sticky top-8 overflow-hidden"}>
+            <div className="bg-emerald-950 p-4 text-white font-black uppercase tracking-widest text-[10px]">
+              Originator Info
+            </div>
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="relative w-20 h-20 border-4 border-amber-400 shrink-0">
+                  {events.host.profileImage ? (
+                    <Image
+                      src={events.host.profileImage}
+                      alt={events.host.fullName}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-emerald-100 flex items-center justify-center text-emerald-950 font-black text-2xl uppercase italic">
+                      {events.host.fullName[0]}
+                    </div>
+                  )}
                 </div>
-              )}
-
-              <div>
-                <p className="font-extrabold text-lg text-gray-900">
-                  {events.host.fullName}
-                </p>
-                <div className="flex items-center text-sm text-yellow-500">
-                  <Star className="w-4 h-4 mr-1" fill="currentColor" />
-                  <span className="text-gray-600 ml-1">
-                    {events.host.rating || "No Rating"}
-                  </span>
+                <div>
+                  <h3 className="text-xl font-black uppercase text-emerald-950 italic">
+                    {events.host.fullName}
+                  </h3>
+                  <div className="flex items-center text-amber-500 font-black">
+                    <Star size={16} fill="currentColor" />
+                    <span className="ml-2 text-emerald-900">
+                      {events.host.rating || "N/A"}
+                    </span>
+                  </div>
                 </div>
               </div>
+              <p className="text-xs font-bold text-emerald-800 italic border-l-4 border-amber-400 pl-4 py-2 bg-emerald-50">
+                &quot;
+                {events.host.bio || "Host has not provided a mission bio."}
+                &quot;
+              </p>
             </div>
-
-            <p className="text-sm text-gray-600 mt-4 border-t pt-4">
-              &quot;{events.host.bio || "Host has not provided a bio."}&quot;
-            </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 sticky top-40">
-            <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
-              Participants
-            </h2>
+          {/* Quick Management */}
+          <div className={boxStyle + " p-6 bg-emerald-950 text-white"}>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-4 text-amber-400">
+              Current Participants
+            </h3>
+            <button className="w-full py-4 border-2 border-amber-400 bg-transparent text-amber-400 hover:bg-amber-400 hover:text-emerald-950 transition-colors font-black uppercase italic flex items-center justify-center gap-3">
+              <Users size={20} />
+              View Roster ({events.participants.length})
+            </button>
 
-            <div className="flex flex-col gap-4">
-              <button className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center">
-                <Users className="w-5 h-5 mr-2" />({events.participants.length})
-              </button>
-
-              <div className="text-xs text-gray-400 mt-4 text-center border-t pt-3">
-                Created: {new Date(events.createdAt).toLocaleDateString()} |
-                Updated: {new Date(events.updatedAt).toLocaleDateString()}
-              </div>
+            <div className="mt-6 pt-4 border-t border-emerald-800 text-[10px] font-bold text-emerald-500 flex justify-between uppercase">
+              <span>
+                EST: {new Date(events.createdAt).toLocaleDateString()}
+              </span>
+              <span>
+                MOD: {new Date(events.updatedAt).toLocaleDateString()}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      <Separator />
-      <div>
-        <h1 className="text-center text-2xl font-bold"> Reviews</h1>
-        {eventReviews.reviews.map((review: any, index: number) => (
-          <ReviewCard key={index} review={review} />
-        ))}
+      <div className="pt-12">
+        <div className="flex items-center gap-4 mb-10">
+          <h2 className="text-4xl font-black uppercase italic text-emerald-950">
+            Reviews
+          </h2>
+          <div className="h-2 bg-amber-400 grow"></div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {eventReviews.reviews.length > 0 ? (
+            eventReviews.reviews.map((review: any, index: number) => (
+              <ReviewCard key={index} review={review} />
+            ))
+          ) : (
+            <div className="col-span-full py-12 border-4 border-dashed border-emerald-950 text-center font-black uppercase italic text-emerald-900/40">
+              No participant feedback reported yet.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
