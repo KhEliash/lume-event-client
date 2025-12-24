@@ -4,7 +4,7 @@ const nextConfig: import("next").NextConfig = {
 
   experimental: {
     serverActions: {
-      bodySizeLimit: "10mb", // adjust as needed
+      bodySizeLimit: "10mb", 
     },
   },
   images: {
