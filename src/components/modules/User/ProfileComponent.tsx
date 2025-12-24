@@ -1,8 +1,4 @@
-
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,31 +6,30 @@ import {
   Phone,
   MapPin,
   Star,
-  CalendarCheck,
   Edit,
-  UserPlus,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-// Helper to format rating display
 const renderRating = (rating: number, totalRatings: number) => {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-3 py-1 w-fit shadow-[2px_2px_0px_0px_rgba(251,191,36,1)]">
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          size={16}
+          size={14}
           className={
             star <= rating
-              ? "fill-yellow-500 text-yellow-500"
-              : "fill-gray-300 text-gray-300"
+              ? "fill-amber-500 text-amber-500"
+              : "fill-emerald-950/10 text-emerald-950/10"
           }
         />
       ))}
-      <span className="ml-1 text-sm font-semibold text-gray-800">
+      <span className="ml-2 text-xs font-black text-emerald-950 uppercase tracking-tighter">
         {rating.toFixed(1)}{" "}
-        <span className="text-gray-500 font-normal">
+        <span className="text-emerald-950/40">
           ({totalRatings || 0} reviews)
         </span>
       </span>
@@ -50,184 +45,161 @@ export function ProfileComponent({ data }: { data: any }) {
   const isHost = user.role === "host";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="mx-auto space-y-8">
       {/* ===== Profile Header ===== */}
-      <Card className="bg-white shadow-xl border-t-4 border-blue-600">
-        <CardContent className="p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
-          <div className="flex items-start gap-6">
-            {/* Avatar */}
-            <Avatar className="w-28 h-28 border-4 border-white shadow-md">
-              <AvatarImage src={user.profileImage || ""} alt={user.fullName} />
-              <AvatarFallback className="text-4xl bg-blue-600 text-white font-bold">
+      <div className="bg-white border-4 border-emerald-950 p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group">
+        <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+          {/* Avatar with Brutalist Border */}
+          <div className="relative">
+            <Avatar className="w-32 h-32 rounded-none border-4 border-emerald-950 shadow-[6px_6px_0px_0px_rgba(6,78,59,1)]">
+              <AvatarImage
+                src={user.profileImage || ""}
+                className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
+              />
+              <AvatarFallback className="rounded-none text-4xl bg-emerald-950 text-amber-400 font-black">
                 {user.fullName?.charAt(0)}
               </AvatarFallback>
             </Avatar>
-
-            {/* User Info & Rating */}
-            <div className="flex-1 space-y-1 pt-1">
-              <h2 className="text-3xl font-extrabold text-gray-900">
-                {user.fullName}
-              </h2>
-
-              {/* Role Badge */}
-              <Badge
-                className={`px-2 py-0.5 text-xs font-semibold ${
-                  isHost
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                {isHost ? (
-                  <>
-                    <UserPlus size={14} className="mr-1" /> Verified Host
-                  </>
-                ) : (
-                  "Regular User"
-                )}
-              </Badge>
-
-              {/* Location */}
-              {user.location && (
-                <div className="flex items-center text-md text-gray-600 gap-2 pt-2">
-                  <MapPin size={18} className="text-blue-500" />
-                  <span>
-                    {user?.location?.area}, {user?.location?.city}
-                  </span>
-                </div>
-              )}
-
-              {/* Rating Display */}
-              <div className="pt-1">
-                {renderRating(user.rating || 0, user.totalRatings)}
+            {isHost && (
+              <div className="absolute -bottom-2 -right-2 bg-amber-400 border-2 border-emerald-950 p-1">
+                <ShieldCheck size={20} className="text-emerald-950" />
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Actions (Since this component is assumed to be for the owner's view) */}
-          <Link href="/profile/update" passHref>
-            <Button className="bg-blue-600 hover:bg-blue-700 transition flex items-center gap-2 cursor-pointer">
-              <Edit className="w-4 h-4" />
-              Update Profile
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
-
-      {/* ===== Contact Info & Stats (Grid) ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Contact Information (Displayed as this is the owner's view) */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-              <Phone className="w-5 h-5 text-blue-500" />
-              Contact Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-center gap-3 text-gray-700">
-              <Mail size={18} className="text-gray-500" />
-              <span className="font-medium">{user.email}</span>
+          <div className="text-center md:text-left space-y-2">
+            <div className="flex flex-col md:flex-row items-center gap-3">
+              <h2 className="text-4xl font-black text-emerald-950 uppercase tracking-tighter leading-none">
+                {user.fullName}
+              </h2>
+              <Badge
+                className={`rounded-none border-2 border-emerald-950 uppercase tracking-widest text-[10px] font-black ${
+                  isHost
+                    ? "bg-amber-400 text-emerald-950"
+                    : "bg-emerald-50 text-emerald-950"
+                }`}
+              >
+                {isHost ? "Verified Host" : "Member"}
+              </Badge>
             </div>
 
-            <div className="flex items-center gap-3 text-gray-700">
-              <Phone size={18} className="text-gray-500" />
-              <span className="font-medium">
-                {user.phone || "Not provided"}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Activity Statistics */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-              <CalendarCheck className="w-5 h-5 text-green-500" />
-              Activity Statistics
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent
-            className={`grid gap-4 ${isHost ? "grid-cols-3" : "grid-cols-2"}`}
-          >
-            {isHost && (
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <p className="text-2xl font-bold text-blue-700">
-                  {hostedEventsCount}
-                </p>
-                <p className="text-xs text-gray-600">Hosted Events</p>
+            {user.location && (
+              <div className="flex items-center justify-center md:justify-start text-xs font-bold text-emerald-950/60 uppercase tracking-widest gap-2">
+                <MapPin size={14} className="text-amber-500" />
+                <span>
+                  {user?.location?.area}, {user?.location?.city}
+                </span>
               </div>
             )}
 
-            <div className="p-2 bg-green-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-700">
-                {joinedEventsCount}
-              </p>
-              <p className="text-xs text-gray-600">Joined Events</p>
+            <div className="pt-2">
+              {renderRating(user.rating || 0, user.totalRatings)}
             </div>
+          </div>
+        </div>
 
-            <div className="p-2 bg-purple-50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-700">
-                {reviewsCount}
-              </p>
-              <p className="text-xs text-gray-600">Reviews Written</p>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/profile/update">
+          <Button className="rounded-none bg-emerald-950 text-amber-400 hover:bg-amber-400 hover:text-emerald-950 border-2 border-emerald-950 font-black uppercase tracking-widest text-xs h-12 px-8 transition-all shadow-[4px_4px_0px_0px_rgba(6,78,59,1)] active:shadow-none translate-y-0 active:translate-y-1">
+            <Edit className="w-4 h-4 mr-2" /> Update Profile
+          </Button>
+        </Link>
       </div>
 
-      {/* ===== Bio ===== */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl text-gray-800">
-            About {user.fullName.split(" ")[0]}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-700 leading-relaxed text-base">
-            {user.bio ||
-              "No biography provided. Click 'Update Profile' to add one!"}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* ===== Interests ===== */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl text-gray-800">
-            Interests & Hobbies
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
-          {user.interests?.length > 0 ? (
-            user.interests.map((interest: string, i: number) => (
-              <Badge
-                key={i}
-                className="px-4 py-1.5 bg-indigo-500 text-white hover:bg-indigo-600 transition shadow-sm font-medium"
-              >
-                {interest}
-              </Badge>
-            ))
-          ) : (
-            <p className="text-gray-600 text-sm italic">
-              User has not specified any interests.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Hosted Events List (Visible only if user is a Host) */}
-      {/* {isHost && (
-        <div className="pt-4">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
-            Your Hosted Events
+      {/* ===== Grid: Details & Stats ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Contact Info */}
+        <div className="md:col-span-1 border-2 border-emerald-950 p-6 bg-white space-y-6">
+          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-emerald-950 border-b-2 border-dotted border-emerald-950 pb-2">
+            Contact Registry
           </h3>
-          <p className="text-gray-600 border p-4 rounded-lg bg-gray-50">
-            [Placeholder: Render a list or carousel of the user&apos;s recent
-            hosted events here.]
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-50 p-2 border border-emerald-950">
+                <Mail size={16} className="text-emerald-950" />
+              </div>
+              <span className="text-xs font-bold text-emerald-900 truncate">
+                {user.email}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-50 p-2 border border-emerald-950">
+                <Phone size={16} className="text-emerald-950" />
+              </div>
+              <span className="text-xs font-bold text-emerald-900">
+                {user.phone || "UNLISTED"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="md:col-span-2 border-2 border-emerald-950 p-6 bg-emerald-950 text-white">
+          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-amber-400 border-b-2 border-dotted border-amber-400/30 pb-2">
+            Mission Statistics
+          </h3>
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="text-center p-4 border border-amber-400/20 bg-emerald-900/50">
+              <p className="text-3xl font-black text-amber-400">
+                {hostedEventsCount}
+              </p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-white/50">
+                Hosted
+              </p>
+            </div>
+            <div className="text-center p-4 border border-amber-400/20 bg-emerald-900/50">
+              <p className="text-3xl font-black text-amber-400">
+                {joinedEventsCount}
+              </p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-white/50">
+                Joined
+              </p>
+            </div>
+            <div className="text-center p-4 border border-amber-400/20 bg-emerald-900/50">
+              <p className="text-3xl font-black text-amber-400">
+                {reviewsCount}
+              </p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-white/50">
+                Reviews
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Bio & Interests ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="border-2 border-emerald-950 p-6 bg-white">
+          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-emerald-950 mb-4 flex items-center gap-2">
+            <Zap size={16} className="text-amber-500" /> Bio / Transmission
+          </h3>
+          <p className="text-sm text-emerald-900/80 leading-relaxed font-medium italic border-l-4 border-amber-400 pl-4">
+            {user.bio ||
+              "No data provided. Update identity file to include biography."}
           </p>
         </div>
-      )} */}
+
+        <div className="border-2 border-emerald-950 p-6 bg-white">
+          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-emerald-950 mb-4">
+            Affinities & Interests
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {user.interests?.length > 0 ? (
+              user.interests.map((interest: string, i: number) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 bg-emerald-50 border border-emerald-950 text-[10px] font-black uppercase tracking-widest text-emerald-950"
+                >
+                  {interest}
+                </span>
+              ))
+            ) : (
+              <p className="text-xs italic text-emerald-950/40">
+                No affinities logged.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

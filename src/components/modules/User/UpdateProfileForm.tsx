@@ -8,10 +8,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import Image from "next/image";
 import { toast } from "sonner";
-import { Camera, Loader2, User as UserIcon, X } from "lucide-react";
+import {
+  // Camera,
+  Loader2,
+  User as UserIcon,
+  // X,
+  Zap,
+  ShieldAlert,
+} from "lucide-react";
 
-// shadcn/ui
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,14 +30,8 @@ import {
 } from "@/components/ui/form";
 import { updateProfileAction } from "@/services/user/userprofile";
 
-// your actions
-// import { updateProfileAction } from "@/actions/user/update-profile-action";
-// import { updateProfileImageAction } from "@/actions/user/update-profile-image-action";
-
-// ---------------- Schema ----------------
-
 const ProfileSchema = z.object({
-  fullName: z.string().min(2),
+  fullName: z.string().min(2, "Name is required for verification"),
   bio: z.string().optional(),
   phone: z.string().optional(),
   locationCity: z.string().optional(),
@@ -42,13 +41,7 @@ const ProfileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof ProfileSchema>;
 
-interface UpdateProfileFormProps {
-  user: any;
-}
-
-// ---------------- Component ----------------
-
-export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
+export function UpdateProfileForm({ user }: { user: any }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -66,60 +59,29 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
     },
   });
 
-  // ---------- Image Handler ----------
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (!f) return;
-
-    if (!f.type.startsWith("image/")) {
-      toast.error("Invalid file");
-      return;
-    }
-
+    if (!f || !f.type.startsWith("image/"))
+      return toast.error("INVALID FORMAT");
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
 
-  const uploadImage = () => {
-    if (!file) return toast.warning("Select a file first");
-
-    // console.log(file);
-
-    // startTransition(async () => {
-    //   const res = await updateProfileImageAction(file, user._id);
-
-    //   if (res.success) {
-    //     toast.success("Profile picture updated");
-    //     setPreview(null);
-    //     setFile(null);
-    //   } else {
-    //     toast.error(res.message);
-    //   }
-    // });
-  };
-
-  // ---------- Submit Data ----------
   const onSubmit = (values: ProfileFormValues) => {
-    console.log(values.phone);
     const payload = {
       fullName: values.fullName,
       bio: values.bio,
       phone: values.phone,
-      location: {
-        city: values.locationCity,
-        area: values.locationArea,
-      },
+      location: { city: values.locationCity, area: values.locationArea },
       interests: values.interests
         ? values.interests.split(",").map((i) => i.trim())
         : [],
     };
-    console.log(values);
 
     startTransition(async () => {
       const res = await updateProfileAction(user._id, payload);
-
       if (res.success) {
-        toast.success(res.message);
+        toast.success("IDENTITY UPDATED");
         window.location.href = "/profile";
       } else {
         toast.error(res.message);
@@ -130,26 +92,33 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
   const imageToShow = preview || user.profileImage;
 
   return (
-    <div className="max-w-3xl mt-12 mx-auto space-y-8">
-      <h1 className="text-center font-semibold text-2xl"> Update</h1>
-      {/* Image Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Picture</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-6 items-center">
-          {/* Image Preview */}
-          <div className="relative w-28 h-28 rounded-full overflow-hidden border">
+    <div className=" mx-auto py-10  space-y-12">
+      <div className="border-b-4 border-emerald-950 pb-4">
+        <h1 className="text-4xl font-black text-emerald-950 uppercase tracking-tighter italic">
+          Identity Override
+        </h1>
+        <p className="text-amber-600 font-bold text-xs uppercase tracking-[0.2em] mt-2">
+          Modify core credentials and profile visuals
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Visual Identity (Image) */}
+        <div className="md:col-span-1 space-y-4">
+          <h3 className="text-xs font-black uppercase tracking-widest text-emerald-950/40">
+            Visual Spec
+          </h3>
+          <div className="relative group w-full aspect-square border-4 border-emerald-950 bg-white shadow-[8px_8px_0px_0px_rgba(6,78,59,1)]">
             {imageToShow ? (
               <Image
                 src={imageToShow}
                 alt="avatar"
                 fill
-                className="object-cover"
+                className="object-cover grayscale hover:grayscale-0 transition-all"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                <UserIcon className="w-10 h-10 text-gray-500" />
+              <div className="w-full h-full flex items-center justify-center bg-emerald-50 text-emerald-950/20">
+                <UserIcon size={48} />
               </div>
             )}
 
@@ -161,170 +130,146 @@ export function UpdateProfileForm({ user }: UpdateProfileFormProps) {
               onChange={handleFile}
             />
 
-            {!file && (
-              <button
-                type="button"
-                className="absolute bottom-1 right-1 bg-blue-600 text-white p-2 rounded-full"
-                onClick={() => fileRef.current?.click()}
-              >
-                <Camera className="w-4 h-4" />
-              </button>
-            )}
-
-            {file && (
-              <button
-                onClick={() => {
-                  setFile(null);
-                  setPreview(null);
-                }}
-                className="absolute top-1 right-1 p-2 bg-red-600 text-white rounded-full"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+            {/* <button
+              type="button"
+              className="absolute -bottom-2 -right-2 bg-amber-400 border-2 border-emerald-950 p-3 hover:bg-emerald-950 hover:text-amber-400 transition-colors shadow-[2px_2px_0px_0px_rgba(6,78,59,1)]"
+              onClick={() => (file ? setFile(null) : fileRef.current?.click())}
+            >
+              {file ? <X size={20} /> : <Camera size={20} />}
+            </button> */}
           </div>
+          {file && (
+            <Button className="w-full rounded-none bg-emerald-950 text-amber-400 border-2 border-emerald-950 font-black uppercase tracking-widest text-[10px] h-8">
+              Confirm New Image
+            </Button>
+          )}
+        </div>
 
-          {/* Upload */}
-          <div className="flex-1">
-            {file ? (
-              <Button
-                onClick={uploadImage}
-                disabled={isPending}
-                className="bg-green-600 text-white"
-              >
-                {isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Upload Image"
-                )}
-              </Button>
-            ) : (
-              <p className="text-gray-500 text-sm">Choose an image to upload</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Text Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Profile</CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Credentials Form */}
+        <div className="md:col-span-2 border-4 border-emerald-950 p-8 bg-white">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Full Name */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 name="fullName"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter full name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Phone */}
-              <FormField
-                name="phone"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel className="font-black uppercase tracking-widest text-[10px] text-emerald-950/50">
+                      Official Designation
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        type="number"
-                        placeholder="Phone number"
+                        className="rounded-none border-2 border-emerald-950 focus-visible:ring-amber-400 font-bold uppercase"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[10px] uppercase font-bold text-red-600" />
                   </FormItem>
                 )}
               />
 
-              {/* Bio */}
-              <FormField
-                name="bio"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        rows={4}
-                        placeholder="Write something..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Location */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  name="locationCity"
+                  name="phone"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel className="font-black uppercase tracking-widest text-[10px] text-emerald-950/50">
+                        Secure Line
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="City" />
+                        <Input
+                          {...field}
+                          type="text"
+                          className="rounded-none border-2 border-emerald-950 focus-visible:ring-amber-400 font-bold"
+                        />
                       </FormControl>
                     </FormItem>
                   )}
                 />
                 <FormField
-                  name="locationArea"
+                  name="locationCity"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Area</FormLabel>
+                      <FormLabel className="font-black uppercase tracking-widest text-[10px] text-emerald-950/50">
+                        HQ City
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Area / Neighborhood" />
+                        <Input
+                          {...field}
+                          className="rounded-none border-2 border-emerald-950 focus-visible:ring-amber-400 font-bold"
+                        />
                       </FormControl>
                     </FormItem>
                   )}
                 />
               </div>
 
-              {/* Interests */}
+              <FormField
+                name="bio"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-black uppercase tracking-widest text-[10px] text-emerald-950/50">
+                      Mission Statement (Bio)
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        rows={3}
+                        className="rounded-none border-2 border-emerald-950 focus-visible:ring-amber-400 font-medium italic"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 name="interests"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Interests</FormLabel>
+                    <FormLabel className="font-black uppercase tracking-widest text-[10px] text-emerald-950/50">
+                      Affinities (Comma Separated)
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="hiking, tech, gaming..." />
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          className="rounded-none border-2 border-emerald-950 focus-visible:ring-amber-400 pr-10"
+                        />
+                        <Zap
+                          size={14}
+                          className="absolute right-3 top-3 text-amber-500"
+                        />
+                      </div>
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Submit */}
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="w-full bg-blue-600"
-              >
-                {isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
+              <div className="pt-4 flex flex-col gap-4">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full rounded-none bg-emerald-950 text-amber-400 hover:bg-amber-400 hover:text-emerald-950 border-2 border-emerald-950 font-black uppercase tracking-widest h-14 transition-all shadow-[6px_6px_0px_0px_rgba(6,78,59,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
+                >
+                  {isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Authorize Changes"
+                  )}
+                </Button>
+                <p className="flex items-center justify-center gap-2 text-[10px] font-bold text-emerald-950/40 uppercase tracking-tighter">
+                  <ShieldAlert size={12} /> Modifications are immediate and
+                  irreversible
+                </p>
+              </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
