@@ -7,7 +7,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-emerald-950 text-white pt-16 pb-8 border-t-4 border-amber-400">
-      <div className="container mx-auto px-2 md:px-6 lg:px-8">
+      <div className="container mx-auto px-4 md:px-10 ">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           {/* Brand Section */}
           <div className="md:col-span-2 space-y-6">
@@ -31,7 +31,7 @@ const Footer = () => {
               Quick Access
             </h4>
             <nav className="flex flex-col gap-3">
-              {["Events", "About", "Contact"].map((item) => (
+              {["Events", "About", "Contact","Faq"].map((item) => (
                 <Link
                   key={item}
                   href={`/${item.toLowerCase()}`}
@@ -72,7 +72,7 @@ const Footer = () => {
 
           <div className="flex gap-8">
             <Link
-              href="/privacy"
+              href="/policy"
               className="text-[10px] font-bold uppercase tracking-widest text-emerald-100/40 hover:text-amber-400 transition-colors"
             >
               Privacy Policy
