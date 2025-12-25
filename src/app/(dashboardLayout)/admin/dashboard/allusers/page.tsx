@@ -17,7 +17,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const role = params.role ?? "user";
 
   const result = await getAllUsers(page, limit, role);
-  console.log(result);
+  // console.log(result);
   if (!result.success) {
     if (result.message?.includes("Authentication token missing")) {
       redirect("/login");

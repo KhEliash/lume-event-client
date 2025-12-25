@@ -48,7 +48,7 @@ const menuItems = {
   admin: [
     { title: "Analytics", url: "/admin/dashboard", icon: "ShieldAlert" },
     { title: "User Control", url: "/admin/dashboard/allusers", icon: "Users2" },
-    // { title: "Platform Logs", url: "/admin/dashboard/logs", icon: "Database" },
+    { title: "All Events", url: "/admin/dashboard/allevents", icon: "Database" },
     { title: "My Profile", url: "/profile", icon: "User" },
     { title: "Back to Home", url: "/", icon: "ArrowLeft" },
   ],
