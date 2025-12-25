@@ -37,6 +37,11 @@ const menuItems = {
       url: "/host/dashboard/hosted-events",
       icon: "Calendar",
     },
+    {
+      title: "Earnings",
+      url: "/host/dashboard/earnings",
+      icon: "CheckCircle",
+    },
     { title: "My Profile", url: "/profile", icon: "User" },
     { title: "Back to Home", url: "/", icon: "ArrowLeft" },
   ],
