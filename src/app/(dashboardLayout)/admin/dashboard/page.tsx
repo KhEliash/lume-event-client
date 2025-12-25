@@ -1,198 +1,302 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { Users, Calendar, DollarSign, Zap } from "lucide-react";
-
+import {
+  Users,
+  Calendar,
+  DollarSign,
+  Activity,
+  ShieldCheck,
+  UserCheck,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
 import { getAllUsers } from "@/services/admin/user-management";
 import { getAllEvents } from "@/services/host/event-actions";
-import { Badge } from "@/components/ui/badge";
 
-// Define a type for a simplified Metric Card
-interface MetricCardProps {
-    title: string;
-    value: number | string;
-    icon: React.ReactNode;
-    color: string;
-    description: string;
-}
+const cardStyle =
+  "bg-white border-4 border-emerald-950 p-6 shadow-[8px_8px_0px_0px_rgba(6,78,59,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none";
+const labelStyle =
+  "text-[10px] font-black uppercase tracking-widest text-emerald-900/40 italic";
 
-// Helper component for the Metric Cards (FIXED)
-const MetricCard: React.FC<MetricCardProps> = ({
+const MetricCard = ({
   title,
   value,
-  icon,
-  color,
+  icon: Icon,
   description,
-}) => (
-  <div
-    className={`p-6 rounded-xl shadow-lg border-t-4 ${color} bg-white transition-all duration-300 hover:shadow-xl`}
-  >
-    <div className="flex justify-between items-start">
-      <div>
-        <p className="text-sm font-medium text-gray-500 uppercase">{title}</p>
-        <h2 className="text-4xl font-extrabold text-gray-900 mt-1">{value}</h2>
+  trendColor = "bg-amber-400",
+}: any) => (
+  <div className={cardStyle}>
+    <div className="flex justify-between items-start mb-4">
+      <div
+        className={`p-3 border-2 border-emerald-950 ${trendColor} text-emerald-950 shadow-[4px_4px_0px_0px_rgba(6,78,59,1)]`}
+      >
+        <Icon size={24} />
       </div>
-
-      <div className={`p-3 rounded-full bg-opacity-10`} style={{ backgroundColor: color.replace('border-', '').replace('-500', '').replace('-4', '00') }}>
-        {/* FIX APPLIED HERE: Asserting the element accepts HTML Attributes */}
-        {React.cloneElement(
-          icon as React.ReactElement<React.HTMLAttributes<HTMLElement>>,
-          {
-            className: `w-8 h-8 ${color.replace("border-", "text-")}`,
-          }
-        )}
-      </div>
+      <span className="text-[10px] font-black uppercase bg-emerald-950 text-white px-2 py-0.5 italic">
+        Live Data
+      </span>
     </div>
-
-    <p className="text-xs text-gray-400 mt-4">{description}</p>
+    <p className={labelStyle}>{title}</p>
+    <h2 className="text-4xl font-black text-emerald-950 italic tracking-tighter mb-1">
+      {value}
+    </h2>
+    <p className="text-xs font-bold text-emerald-800/60">{description}</p>
   </div>
 );
 
-// -------------------------------
-// 🔥 FIXED METRICS CALCULATION
-// -------------------------------
-const calculateMetrics = (usersRes: any, eventsRes: any) => {
-  const usersData = usersRes?.users?.data || [];
-  const totalUsers = usersRes?.users?.meta?.total || 0;
-  const totalHosts = usersData.filter((u: any) => u.role === "host").length;
+const processIntelligence = (usersRes: any, eventsRes: any) => {
+  const users = usersRes?.users?.data || [];
+  const meta = usersRes?.users?.meta || { total: 0 };
+  const events = eventsRes?.data || [];
 
-  // ----- FIXED EVENT STRUCTURE -----
-  const eventsData = eventsRes?.data || [];
+  // User Stats
+  const admins = users.filter((u: any) => u.role === "admin").length;
+  const hosts = users.filter((u: any) => u.role === "host").length;
+  const regularUsers = users.filter((u: any) => u.role === "user").length;
+
+  // Event Stats
   const totalEvents = eventsRes?.meta?.total || 0;
-
-  const openEvents = eventsData.filter((e: any) => e.status === "open").length;
-
-  const totalParticipants = eventsData.reduce(
-    (sum: number, e: any) => sum + (e.currentParticipants || 0),
+  const openEvents = events.filter((e: any) => e.status === "open").length;
+  const totalRevenue = events.reduce(
+    (acc: number, curr: any) =>
+      acc + curr.joiningFee * (curr.currentParticipants || 0),
     0
   );
 
-  const eventsWithFee = eventsData.filter((e: any) => e.joiningFee > 0);
-
-  const estimatedTotalFee = eventsWithFee.reduce(
-    (sum: number, e: any) => sum + e.joiningFee * (e.currentParticipants || 0),
+  const totalPAX = events.reduce(
+    (acc: number, curr: any) => acc + (curr.currentParticipants || 0),
     0
   );
 
   return {
-    totalUsers,
-    totalHosts,
-    totalEvents,
-    openEvents,
-    totalParticipants,
-    estimatedTotalFee:
-      estimatedTotalFee > 0 ? `$${estimatedTotalFee.toFixed(2)}` : "N/A",
+    meta: {
+      totalUsers: meta.total,
+      admins,
+      hosts,
+      regularUsers,
+    },
+    events: {
+      total: totalEvents,
+      open: openEvents,
+      revenue: totalRevenue,
+      pax: totalPAX,
+    },
   };
 };
 
-// -------------------------------
-// MAIN ANALYTICS PAGE
-// -------------------------------
 const Analytics = async () => {
   const usersResponse = await getAllUsers();
   const eventsResponse = await getAllEvents();
 
-  const metrics = calculateMetrics(
-    usersResponse.success ? usersResponse : {},
-    eventsResponse.success ? eventsResponse : {}
-  );
+  const metrics = processIntelligence(usersResponse, eventsResponse);
 
   return (
-    <div className="p-6 md:p-10  min-h-screen">
-      {/* Header */}
-      <header className="mb-10 border-b pb-4">
-        <h1 className="text-4xl font-extrabold text-gray-900">
-          📊 Admin Dashboard Analytics
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Overview of system activity, users, and events.
-        </p>
-      </header>
+    <div className="px-4 md:px-10  py-6 min-h-screen space-y-12">
+      {/* Header Intel */}
+      <div className="border-l-8 border-amber-400 pl-6 py-2 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-2 text-emerald-900/40 mb-1">
+            <BarChart3 size={14} />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">
+              Core Intelligence // Analytics
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-emerald-950 leading-none">
+            System{" "}
+            <span className="text-amber-500 underline decoration-emerald-950 underline-offset-8">
+              Overview
+            </span>
+          </h1>
+        </div>
+        <div className="bg-emerald-950 text-white p-4 font-black uppercase italic text-xs shadow-[8px_8px_0px_0px_rgba(251,191,36,1)]">
+          Session Status: Admin Verified
+        </div>
+      </div>
 
-      {/* KEY METRIC CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      {/* Primary Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <MetricCard
-          title="Total Registered Users"
-          value={metrics.totalUsers}
-          icon={<Users />}
-          color="border-indigo-500"
-          description={`Including ${metrics.totalHosts} hosts.`}
+          title="Total Personnel"
+          value={metrics.meta.totalUsers}
+          icon={Users}
+          description={`${metrics.meta.regularUsers} standard active accounts.`}
         />
-
         <MetricCard
-          title="Total Events Created"
-          value={metrics.totalEvents}
-          icon={<Calendar />}
-          color="border-green-500"
-          description={`${metrics.openEvents} events are open for booking.`}
+          title="Operational Events"
+          value={metrics.events.total}
+          icon={Calendar}
+          trendColor="bg-emerald-400"
+          description={`${metrics.events.open} events currently accepting PAX.`}
         />
-
         <MetricCard
-          title="Total Participants"
-          value={metrics.totalParticipants}
-          icon={<Zap />}
-          color="border-yellow-600"
-          description="All participants across all events."
+          title="Global Participants"
+          value={metrics.events.pax}
+          icon={Activity}
+          description="Total engagement across all mission types."
         />
-
         <MetricCard
-          title="Estimated Revenue (Fee)"
-          value={metrics.estimatedTotalFee}
-          icon={<DollarSign />}
-          color="border-teal-500"
-          description="Amount collected from joining fees."
+          title="System Revenue"
+          value={`$${metrics.events.revenue.toLocaleString()}`}
+          icon={DollarSign}
+          trendColor="bg-emerald-400"
+          description="Gross credits from mission joining fees."
         />
       </div>
 
-      {/* Summary Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            User Role Distribution
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Intel: Role Distribution */}
+        <div className="lg:col-span-7 bg-white border-4 border-emerald-950 p-8 shadow-[10px_10px_0px_0px_rgba(251,191,36,1)]">
+          <h3 className="text-2xl font-black uppercase italic text-emerald-950 mb-8 border-b-4 border-emerald-950 inline-block">
+            Personnel Distribution
           </h3>
-          <div className="h-64 flex items-center justify-center bg-gray-50 border rounded-lg text-gray-500">
-            [Chart Placeholder]
+
+          <div className="space-y-8">
+            <div className="group">
+              <div className="flex justify-between mb-2">
+                <span className="text-xs font-black uppercase flex items-center gap-2">
+                  <UserCheck size={14} className="text-amber-500" /> Standard
+                  Users
+                </span>
+                <span className="text-xs font-black">
+                  {metrics.meta.regularUsers}
+                </span>
+              </div>
+              <div className="h-6 border-2 border-emerald-950 bg-emerald-50 relative overflow-hidden">
+                <div
+                  className="h-full bg-emerald-950 transition-all duration-1000"
+                  style={{
+                    width: `${
+                      (metrics.meta.regularUsers / metrics.meta.totalUsers) *
+                      100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="group">
+              <div className="flex justify-between mb-2">
+                <span className="text-xs font-black uppercase flex items-center gap-2">
+                  <TrendingUp size={14} className="text-emerald-500" />{" "}
+                  Certified Hosts
+                </span>
+                <span className="text-xs font-black">{metrics.meta.hosts}</span>
+              </div>
+              <div className="h-6 border-2 border-emerald-950 bg-emerald-50 relative overflow-hidden">
+                <div
+                  className="h-full bg-amber-400 transition-all duration-1000"
+                  style={{
+                    width: `${
+                      (metrics.meta.hosts / metrics.meta.totalUsers) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="group">
+              <div className="flex justify-between mb-2">
+                <span className="text-xs font-black uppercase flex items-center gap-2">
+                  <ShieldCheck size={14} className="text-red-500" /> Command
+                  Admins
+                </span>
+                <span className="text-xs font-black">
+                  {metrics.meta.admins}
+                </span>
+              </div>
+              <div className="h-6 border-2 border-emerald-950 bg-emerald-50 relative overflow-hidden">
+                <div
+                  className="h-full bg-red-500 transition-all duration-1000"
+                  style={{
+                    width: `${
+                      (metrics.meta.admins / metrics.meta.totalUsers) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-lg border">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Event Status Summary
-          </h3>
-          <ul className="space-y-3">
-            <li className="flex justify-between items-center border-b pb-2">
-              <span>Open Events</span>
-              <Badge className="bg-green-500 text-white">
-                {metrics.openEvents}
-              </Badge>
-            </li>
+        {/* Right Intel: Quick Status Summary */}
+        <div className="lg:col-span-5 flex flex-col gap-8">
+          <div className="bg-emerald-950 text-white p-8 border-4 border-emerald-950 shadow-[10px_10px_0px_0px_rgba(16,185,129,1)]">
+            <h3 className="text-xl font-black uppercase italic mb-6 text-amber-400">
+              System Integrity
+            </h3>
+            <ul className="space-y-4">
+              <li className="flex justify-between items-center border-b border-white/10 pb-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                  Active Deployments
+                </span>
+                <span className="font-black italic text-lg">
+                  {metrics.events.open}
+                </span>
+              </li>
+              <li className="flex justify-between items-center border-b border-white/10 pb-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                  Total User Load
+                </span>
+                <span className="font-black italic text-lg">
+                  {metrics.meta.totalUsers}
+                </span>
+              </li>
+              <li className="flex justify-between items-center border-b border-white/10 pb-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                  Revenue Density
+                </span>
+                <span className="font-black italic text-lg">
+                  $
+                  {(
+                    metrics.events.revenue / (metrics.events.total || 1)
+                  ).toFixed(2)}{" "}
+                  / Avg
+                </span>
+              </li>
+            </ul>
+          </div>
 
-            <li className="flex justify-between items-center border-b pb-2">
-              <span>Completed Events</span>
-              <Badge variant="secondary">
-                {metrics.totalEvents - metrics.openEvents}
-              </Badge>
-            </li>
-
-            <li className="flex justify-between items-center">
-              <span>Total Hosts</span>
-              <Badge className="bg-orange-500 text-white">
-                {metrics.totalHosts}
-              </Badge>
-            </li>
-          </ul>
+          <div className="bg-amber-400 p-8 border-4 border-emerald-950 shadow-[10px_10px_0px_0px_rgba(6,78,59,1)]">
+            <h3 className="text-xl font-black uppercase italic text-emerald-950">
+              Mission Manifest
+            </h3>
+            <p className="text-[10px] font-black uppercase text-emerald-950/60 mb-6">
+              Engagement Capacity
+            </p>
+            <div className="flex items-center justify-center py-4 border-2 border-emerald-950 bg-white">
+              <div className="text-center">
+                <p className="text-4xl font-black italic text-emerald-950 tracking-tighter">
+                  {(
+                    (metrics.events.open / (metrics.events.total || 1)) *
+                    100
+                  ).toFixed(0)}
+                  %
+                </p>
+                <p className="text-[8px] font-black uppercase text-emerald-900/40 italic">
+                  Activity Rate
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Error Handling */}
-      {(!usersResponse.success || !eventsResponse.success) && (
-        <div className="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-          <p className="font-semibold">⚠ Data Fetching Warning:</p>
-          <p className="text-sm">
-            Users: {usersResponse?.message || "Error"} | Events:{" "}
-            {eventsResponse?.message || "Error"}
-          </p>
+      {/* Server Intel Feed */}
+      <div className="bg-white border-4 border-emerald-950 p-4">
+        <div className="flex items-center gap-4 text-[10px] font-black uppercase text-emerald-950">
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 animate-pulse" /> Server
+            Status: Optimal
+          </span>
+          <span className="opacity-20">|</span>
+          <span>Last Sync: {new Date().toLocaleTimeString()}</span>
+          <span className="opacity-20">|</span>
+          <span className="text-amber-600">
+            Total Database Entries:{" "}
+            {metrics.meta.totalUsers + metrics.events.total}
+          </span>
         </div>
-      )}
+      </div>
     </div>
   );
 };
