@@ -1,6 +1,7 @@
 import { EventDetails } from "@/components/modules/event/EventDetails";
 import { getBookingForEvent } from "@/services/booking/booking-actions";
 import { eventById } from "@/services/host/event-actions";
+import { getEventReviews } from "@/services/review/review-actions";
 import { getMe } from "@/services/user/userprofile";
 
 const EventDetailsPage = async ({ params }: { params: { id: string } }) => {
@@ -30,10 +31,17 @@ const EventDetailsPage = async ({ params }: { params: { id: string } }) => {
     const bookingRes = await getBookingForEvent(event._id);
     bookings = bookingRes?.result || null;
   }
+  const Reviews = await getEventReviews(id);
+  const eventReviewsRes = Reviews?.reviews || null;
 
   return (
     <div className="p-0">
-      <EventDetails event={event} userId={userId} booking={bookings} />
+      <EventDetails
+        event={event}
+        userId={userId}
+        booking={bookings}
+        reviews={eventReviewsRes}
+      />
     </div>
   );
 };

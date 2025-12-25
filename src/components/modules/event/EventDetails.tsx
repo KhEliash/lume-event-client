@@ -25,8 +25,9 @@ import { startTransition, useState } from "react";
 import { bookingAction } from "@/services/booking/booking-actions";
 import { CreateReviewDialog } from "../Host/CreateReviewDialoge";
 import Link from "next/link";
+import { ReviewCard } from "../Host/ReviewCard";
 
-export const EventDetails = ({ event, userId, booking }: any) => {
+export const EventDetails = ({ event, userId, booking, reviews }: any) => {
   const router = useRouter();
   const pathname = usePathname();
   const [guestCount, setGuestCount] = useState(1);
@@ -382,6 +383,26 @@ export const EventDetails = ({ event, userId, booking }: any) => {
               </div>
             )}
           </div>
+        </div>
+      </div>
+      <div className="pt-12">
+        <div className="flex items-center gap-4 mb-10">
+          <h2 className="text-4xl font-black uppercase italic text-emerald-950">
+            Reviews
+          </h2>
+          <div className="h-2 bg-amber-400 grow"></div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {reviews.length > 0 ? (
+            reviews.map((review: any, index: number) => (
+              <ReviewCard key={index} review={review} />
+            ))
+          ) : (
+            <div className="col-span-full py-12 border-4 border-dashed border-emerald-950 text-center font-black uppercase italic text-emerald-900/40">
+              No participant feedback reported yet.
+            </div>
+          )}
         </div>
       </div>
     </div>
