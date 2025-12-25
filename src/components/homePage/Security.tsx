@@ -67,7 +67,7 @@ export default function Security() {
 
               {/* Content */}
               <div className="space-y-4">
-                <h4 className="text-2xl md:text-3xl lg:text-[10vw] font-black uppercase italic text-emerald-950 tracking-tighter">
+                <h4 className="text-2xl md:text-3xl lg:text-[2vw] font-black uppercase italic text-emerald-950 tracking-tighter mb-2">
                   {item.title}
                 </h4>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-950/60 leading-relaxed max-w-xs">
